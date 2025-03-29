@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLSU SCoOp - Dashboard</title>
+
+        <!-- Import Noto Sans from Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+        <!-- Link to External CSS -->
+        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: 'Noto Sans', sans-serif;
+                background-color: #d9dbc9;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .container {
+                display: flex;
+                align-items: center;
+                background: transparent;
+                padding: 50px;
+                border-radius: 12px;
+                /*box-shadow: 8px 8px 16px rgba(0,0,0,0.1);*/
+                max-width: 900px;
+            }
+            .left-content {
+                flex: 1;
+                text-align: left;
+                padding-right: 150px;
+            }
+            .logo {
+                width: 310px;
+                display: block;
+                margin-bottom: 12px;
+            }
+            .right-content {
+                flex: 1;
+                background: #f9f6f0;
+                padding: 15px;
+                border-radius: 0px;
+                text-align: center;
+            }
+            .btn {
+                display: inline-block;
+                width: 100%;
+                padding: 15px;
+                margin: 15px 0;
+                border: 1.5px solid black;
+                background: transparent;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 400;
+            }
+            .btn:hover {
+                background: #ddd;
+            }
+    
+            .info {
+                font-size: 14px;
+                color: black;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Content (Logo & Text) -->
+        <div class="left-content">
+            <img src="icons/scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
+            <div class="text">
+                <p><strong>ADDRESS:</strong> RM. 105, BRO. CONNON HALL</p>
+                <p><strong>EMAIL:</strong> SCOOP@DLSU.EDU.PH</p>
+            </div>
+        </div>
+
+        <!-- Right Content (Buttons) -->
+        <div class="right-content">
+            <button class="btn">About Us</button>
+            <button class="btn">FAQs</button>
+            <button class="btn">Services</button>
+            <button class="btn">Order Form</button>
+            <button class="btn">Order Tracker</button>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
