@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLSU SCoOp - Services</title>
+
+        <!-- Import Noto Sans from Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+        <!-- Link to External CSS -->
+        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: 'Noto Sans', sans-serif;
+                background-color: #d9dbc9; 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh; 
+                margin: 0;
+                padding: 30px;
+                box-sizing: border-box;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f6f0;
+                padding: 20px;
+                border-radius: 12px;
+                max-width: 900px;
+                width: 90%;
+                min-height: 70vh;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            }
+            .logo {
+                width: 250px;
+                display: block;
+                margin-bottom: 5px;
+                margin: 0 auto;
+            }
+            .content {
+                flex: 1;
+                background: #f9f6f0;
+                padding: 15px;
+                border-radius: 0px;
+                text-align: center;
+            }
+            .title{
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .services {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Creates two equal columns */
+                gap: 10px 30px; /* Adds spacing between columns & rows */
+                text-align: left;
+                padding: 10px;
+                max-width: 700px; /* Keeps it compact */
+                margin: 0 auto; /* Centers the grid */
+            }
+            .services strong {
+                grid-column: span 2; /* Ensures headings span both columns */
+                margin-top: 30px;
+                margin: 0 auto;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
+            <div class="text">
+                <p class="title"><strong>Services</strong></p>
+                <div class="services">
+                    <strong>Printing/Photocopy</strong>
+                    <li>Black & White - P2</li>
+                    <li>Colored - P3</li>
+                
+                    <strong>Laminated IDs & Nametags</strong>
+                    <li>3R One-sided - P30</li>
+                    <li>3R Back-to-back - P35</li>
+                
+                    <strong>Lamination</strong>
+                    <li>1/4 size - P15</li>
+                    <li>1/2 size - P20</li>
+                    <li>1 whole size - P25</li>
+                
+                    <strong>Certificate Printing</strong>
+                    <li>Letter size - P11</li>
+                
+                    <strong>Sticker Paper Printing</strong>
+                    <li>Matte sticker paper - P35</li>
+                    <li>Glossy sticker paper - P30</li>
+                
+                    <strong>Matte Board Printing</strong>
+                    <li>A4 size - P30</li>
+                
+                    <strong>Ticket Printing</strong>
+                    <li>Perforated paper - P11</li>
+                
+                    <strong>Poster Printing</strong>
+                    <li>A4 size - P35</li>
+                </div>                
+            </div>
+        </div>
+    </div>
+</body>
+</html>

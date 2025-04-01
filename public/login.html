@@ -94,7 +94,7 @@
     <div class="container">
           <!-- Left Side: Logo and Text -->
           <div class="left-content">
-            <img src="icons/scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
+            <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
             <p class="info"><strong>ADDRESS:</strong> RM. 105, BRO. CONNON HALL</p>
             <p class="info"><strong>EMAIL:</strong> SCOOP@DLSU.EDU.PH</p>
         
@@ -106,24 +106,45 @@
             <input type="text" id="email" placeholder="Username/Email" class="input-field">
             <input type="password" id="password" placeholder="Password" class="input-field">
             <button class="btn" onclick="login()">Login</button>
-            <p class="signup-link">Don't have an account? <a href="index.html">Sign up</a></p>
+            <p class="signup-link">Don't have an account? <a href="signup.html">Sign up</a></p>
         </div>
     </div>
 
     <script>
-        function login() {
-            const correctEmail = "admin";
-            const correctPassword = "dlsu1234";
-
+        async function login() {
             let email = document.getElementById("email").value;
             let password = document.getElementById("password").value;
-
-            if (email === correctEmail && password === correctPassword) {
-                window.location.href = "dashboard.html"; // Redirect to Dashboard
-            } else {
-                alert("Invalid email or password. Try again.");
+    
+            // Create login request data
+            const requestData = {
+                email: email,
+                password: password
+            };
+    
+            try {
+                const response = await fetch("http://localhost:5000/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestData)
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    alert("Login successful!");
+                    localStorage.setItem("token", data.token); // Store token
+                    window.location.href = "dashboard.html"; // Redirect after login
+                } else {
+                    alert(data.msg || "Invalid credentials. Try again.");
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                alert("Error logging in. Please try again.");
             }
         }
     </script>
+    
 </body>
 </html>
