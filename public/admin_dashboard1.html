@@ -1,0 +1,225 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="styles.css">
+        <script>
+            function toggleDropdown() {
+                document.getElementById("adminDropdown").classList.toggle("show");
+            }
+
+            window.onclick = function(event) {
+                if (!event.target.matches('.admin-btn')) {
+                    var dropdowns = document.getElementsByClassName("dropdown-content");
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
+                    }
+                }
+            }
+        </script>
+        <style>
+            body {
+                font-family: 'Noto Sans', sans-serif;
+                background-color: #d9dbc9;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            /* Navigation Bar */
+            .navbar {
+                background-color: #4a4a4a;
+                color: white;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+            }
+
+            .navbar .logo {
+                display: flex;
+                align-items: center;
+            }
+
+            .navbar img {
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+            }
+
+            .navbar h1 {
+                font-size: 20px;
+                margin: 0;
+            }
+
+            .admin-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .admin-btn {
+                background: none;
+                color: white;
+                border: none;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                right: 0;
+                background-color: white;
+                min-width: 120px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+            }
+
+            .dropdown-content a {
+                color: black;
+                padding: 10px;
+                text-decoration: none;
+                display: block;
+            }
+
+            .dropdown-content a:hover {
+                background-color: #ddd;
+            }
+
+            .show {
+                display: block;
+            }
+
+            /* Layout */
+            .main-container {
+                display: flex;
+                height: 100%;
+            }
+
+            /* Sidebar */
+            .sidebar {
+                width: 250px;
+                background-color: #f9f6f0;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar button {
+                padding: 15px;
+                margin: 10px 0;
+                border: 1.5px solid black;
+                background: transparent;
+                cursor: pointer;
+                font-size: 16px;
+                width: 100%;
+                text-align: left;
+            }
+
+            .sidebar button:hover {
+                background: #ddd;
+            }
+
+            /* Main Content */
+            .content {
+                flex-grow: 1;
+                padding: 20px;
+                background-color: #d9dbc9;;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .recent-orders {
+                background: #f9f6f0;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .order {
+                padding: 10px;
+                border-bottom: 1px solid black;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .order:last-child {
+                border-bottom: none;
+            }
+
+            .order span {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- Top Navbar -->
+        <div class="navbar">
+            <div class="logo">
+                <img src="logo-placeholder.png" alt="Logo">
+                <h1>Student Cooperative (SCoOp)</h1>
+            </div>
+            <div class="admin-dropdown">
+                <button class="admin-btn" onclick="toggleDropdown()">Admin Account ▼</button>
+                <div id="adminDropdown" class="dropdown-content">
+                    <a href="#">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Container -->
+        <div class="main-container">
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <button onclick="location.href='order_management.html'">Order Management</button>
+                <button onclick="location.href='user_management.html'">User Management</button>
+                <button onclick="location.href='reports.html'">Reports</button>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <h2>Recent Orders</h2>
+                <div class="recent-orders">
+                    <div class="order">
+                        <span>Customer: Juan Dela Cruz</span>
+                        <span>Product: A4 Black</span>
+                        <span>₱30.00</span>
+                        <span>Qty: 10</span>
+                        <span>Ordered: 03/28/2025</span>
+                        <span>Due: 03/30/2025</span>
+                    </div>
+                    <div class="order">
+                        <span>Customer: Maria Santos</span>
+                        <span>Product: A4 Color</span>
+                        <span>₱50.00</span>
+                        <span>Qty: 5</span>
+                        <span>Ordered: 03/27/2025</span>
+                        <span>Due: 03/29/2025</span>
+                    </div>
+                    <div class="order">
+                        <span>Customer: John Reyes</span>
+                        <span>Product: A3 Black</span>
+                        <span>₱100.00</span>
+                        <span>Qty: 2</span>
+                        <span>Ordered: 03/26/2025</span>
+                        <span>Due: 03/28/2025</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+    </body>
+    </html>

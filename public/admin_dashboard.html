@@ -1,225 +1,196 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Dashboard</title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="styles.css">
-        <script>
-            function toggleDropdown() {
-                document.getElementById("adminDropdown").classList.toggle("show");
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DLSU SCoOp Advanced Order System</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Custom styles */
+    body {
+      background-color: #d9dbc9;
+      color: #333333;
+    }
+    
+    .admin-title {
+      font-family: 'Quattrocento', serif;
+    }
+    
+    .nav-button {
+      font-family: 'Cormorant Garamond', serif;
+    }
+    
+    .order-quantity {
+      font-family: 'Garamond', serif;
+    }
+    
+    .order-details {
+      font-family: 'Quattrocento', serif;
+    }
+    
+    .container-bg {
+      background-color: #f1ebe5;
+    }
+    
+    .card-bg {
+      background-color: #f9f6f0;
+    }
+  </style>
+  
+  <script>
+    // Tailwind Config
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#d9dbc9',
+            container: '#f1ebe5',
+            card: '#f9f6f0',
+          }
+        }
+      }
+    }
+    
+    // Dropdown functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownButton = document.getElementById('adminDropdownBtn');
+      const dropdownMenu = document.getElementById('adminDropdownMenu');
+      
+      dropdownButton.addEventListener('click', function() {
+        dropdownMenu.classList.toggle('hidden');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+          dropdownMenu.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</head>
+<body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
+  <!-- Admin Dropdown - Top Right -->
+  <div class="self-end mb-6">
+    <div class="relative">
+      <button 
+        id="adminDropdownBtn"
+        class="px-4 py-2 border border-gray-400 rounded flex items-center"
+      >
+        Admin <span class="ml-2">▼</span>
+      </button>
+      <div 
+        id="adminDropdownMenu"
+        class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden"
+      >
+        <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
 
-            window.onclick = function(event) {
-                if (!event.target.matches('.admin-btn')) {
-                    var dropdowns = document.getElementsByClassName("dropdown-content");
-                    for (var i = 0; i < dropdowns.length; i++) {
-                        var openDropdown = dropdowns[i];
-                        if (openDropdown.classList.contains('show')) {
-                            openDropdown.classList.remove('show');
-                        }
-                    }
-                }
-            }
-        </script>
-        <style>
-            body {
-                font-family: 'Noto Sans', sans-serif;
-                background-color: #d9dbc9;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-            }
+  <!-- Main Container -->
+  <div class="container mx-auto container-bg p-8 rounded-lg shadow-md">
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- Title and Buttons Column -->
+      <div class="md:w-1/2 flex flex-col items-center">
+        <!-- Admin Dashboard Title -->
+        <h1 class="admin-title text-5xl md:text-6xl text-center mb-10">
+          Admin Dashboard
+        </h1>
 
-            /* Navigation Bar */
-            .navbar {
-                background-color: #4a4a4a;
-                color: white;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px 20px;
-            }
-
-            .navbar .logo {
-                display: flex;
-                align-items: center;
-            }
-
-            .navbar img {
-                width: 40px;
-                height: 40px;
-                margin-right: 10px;
-            }
-
-            .navbar h1 {
-                font-size: 20px;
-                margin: 0;
-            }
-
-            .admin-dropdown {
-                position: relative;
-                display: inline-block;
-            }
-
-            .admin-btn {
-                background: none;
-                color: white;
-                border: none;
-                font-size: 16px;
-                cursor: pointer;
-            }
-
-            .dropdown-content {
-                display: none;
-                position: absolute;
-                right: 0;
-                background-color: white;
-                min-width: 120px;
-                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-                z-index: 1;
-            }
-
-            .dropdown-content a {
-                color: black;
-                padding: 10px;
-                text-decoration: none;
-                display: block;
-            }
-
-            .dropdown-content a:hover {
-                background-color: #ddd;
-            }
-
-            .show {
-                display: block;
-            }
-
-            /* Layout */
-            .main-container {
-                display: flex;
-                height: 100%;
-            }
-
-            /* Sidebar */
-            .sidebar {
-                width: 250px;
-                background-color: #f9f6f0;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
-            }
-
-            .sidebar button {
-                padding: 15px;
-                margin: 10px 0;
-                border: 1.5px solid black;
-                background: transparent;
-                cursor: pointer;
-                font-size: 16px;
-                width: 100%;
-                text-align: left;
-            }
-
-            .sidebar button:hover {
-                background: #ddd;
-            }
-
-            /* Main Content */
-            .content {
-                flex-grow: 1;
-                padding: 20px;
-                background-color: #d9dbc9;;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .recent-orders {
-                background: #f9f6f0;
-                padding: 15px;
-                border-radius: 8px;
-                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .order {
-                padding: 10px;
-                border-bottom: 1px solid black;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .order:last-child {
-                border-bottom: none;
-            }
-
-            .order span {
-                font-weight: bold;
-            }
-        </style>
-    </head>
-    <body>
-
-        <!-- Top Navbar -->
-        <div class="navbar">
-            <div class="logo">
-                <img src="logo-placeholder.png" alt="Logo">
-                <h1>Student Cooperative (SCoOp)</h1>
-            </div>
-            <div class="admin-dropdown">
-                <button class="admin-btn" onclick="toggleDropdown()">Admin Account ▼</button>
-                <div id="adminDropdown" class="dropdown-content">
-                    <a href="#">Logout</a>
-                </div>
-            </div>
+        <!-- Navigation Buttons -->
+        <div class="w-full flex flex-col gap-4 max-w-md">
+          <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='order_management.html'">
+            Order Management
+          </button>
+          <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='user_management.html'">
+            User Management
+          </button>
+          <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='reports.html'">
+            Reports
+          </button>
         </div>
+      </div>
 
-        <!-- Main Container -->
-        <div class="main-container">
-
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <button onclick="location.href='order_management.html'">Order Management</button>
-                <button onclick="location.href='user_management.html'">User Management</button>
-                <button onclick="location.href='reports.html'">Reports</button>
+      <!-- Recent Orders Column -->
+      <div class="md:w-1/2">
+        <h2 class="admin-title text-xl mb-4">
+          Recent Orders
+        </h2>
+        <div class="card-bg p-4 rounded-md shadow-sm">
+          <!-- Order Item 1 -->
+          <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+            <div class="flex items-start">
+              <span class="order-quantity font-bold mr-3">10x</span>
+              <div class="flex flex-col">
+                <span class="order-details">Size: A4: Black</span>
+                <span class="text-sm text-gray-600">Hannah Nicole Casing</span>
+              </div>
             </div>
-
-            <!-- Content -->
-            <div class="content">
-                <h2>Recent Orders</h2>
-                <div class="recent-orders">
-                    <div class="order">
-                        <span>Customer: Juan Dela Cruz</span>
-                        <span>Product: A4 Black</span>
-                        <span>₱30.00</span>
-                        <span>Qty: 10</span>
-                        <span>Ordered: 03/28/2025</span>
-                        <span>Due: 03/30/2025</span>
-                    </div>
-                    <div class="order">
-                        <span>Customer: Maria Santos</span>
-                        <span>Product: A4 Color</span>
-                        <span>₱50.00</span>
-                        <span>Qty: 5</span>
-                        <span>Ordered: 03/27/2025</span>
-                        <span>Due: 03/29/2025</span>
-                    </div>
-                    <div class="order">
-                        <span>Customer: John Reyes</span>
-                        <span>Product: A3 Black</span>
-                        <span>₱100.00</span>
-                        <span>Qty: 2</span>
-                        <span>Ordered: 03/26/2025</span>
-                        <span>Due: 03/28/2025</span>
-                    </div>
-                </div>
+            <span class="font-medium">₱30.00</span>
+          </div>
+          
+          <!-- Order Item 2 -->
+          <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+            <div class="flex items-start">
+              <span class="order-quantity font-bold mr-3">07x</span>
+              <div class="flex flex-col">
+                <span class="order-details">Size: A4: Black</span>
+                <span class="text-sm text-gray-600">Hannah Nicole Casing</span>
+              </div>
             </div>
-            
+            <span class="font-medium">₱21.00</span>
+          </div>
+          
+          <!-- Order Item 3 -->
+          <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+            <div class="flex items-start">
+              <span class="order-quantity font-bold mr-3">03x</span>
+              <div class="flex flex-col">
+                <span class="order-details">Size: A4: Color</span>
+                <span class="text-sm text-gray-600">Hannah Nicole Casing</span>
+              </div>
+            </div>
+            <span class="font-medium">₱75.00</span>
+          </div>
+          
+          <!-- Order Item 4 -->
+          <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+            <div class="flex items-start">
+              <span class="order-quantity font-bold mr-3">04x</span>
+              <div class="flex flex-col">
+                <span class="order-details">Size: A4: Color</span>
+                <span class="text-sm text-gray-600">Hannah Nicole Casing</span>
+              </div>
+            </div>
+            <span class="font-medium">₱100.00</span>
+          </div>
+          
+          <!-- Order Item 5 -->
+          <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+            <div class="flex items-start">
+              <span class="order-quantity font-bold mr-3">02x</span>
+              <div class="flex flex-col">
+                <span class="order-details">Size: A4: Black</span>
+                <span class="text-sm text-gray-600">Hannah Nicole Casing</span>
+              </div>
+            </div>
+            <span class="font-medium">₱06.00</span>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
 
-    </body>
-    </html>
