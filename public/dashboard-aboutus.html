@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLSU SCoOp - Dashboard</title>
+
+        <!-- Import Noto Sans from Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+        <!-- Link to External CSS -->
+        <link rel="stylesheet" href="styles.css">
+        <style>
+            body {
+                font-family: 'Noto Sans', sans-serif;
+                background-color: #d9dbc9; 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh; 
+                margin: 0;
+                padding: 30px;
+                box-sizing: border-box;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f6f0;
+                padding: 20px;
+                border-radius: 12px;
+                max-width: 900px;
+                width: 90%;
+                min-height: 70vh;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            }
+            .logo {
+                width: 250px;
+                display: block;
+                margin-bottom: 5px;
+                margin: 0 auto;
+            }
+            .content {
+                flex: 1;
+                background: #f9f6f0;
+                padding: 15px;
+                border-radius: 0px;
+                text-align: center;
+            }
+            .title{
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .photos {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 20px;
+                align-items: center;
+            }
+
+            .photos img {
+                height: 250px;
+                width: auto;
+                object-fit: cover;
+                border-radius: 8px; 
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
+            <div class="text">
+                <p class="title"><strong>What is DLSU SCoOp?</strong></p>
+                <strong>DLSU Student Co-Operative (SCoOp)</strong> is the first 100% student-owned, student-operated, and student-built business wihin a university in the Philippines.
+                <br/><br/>As a student co-operative, SCoOp trains its members to provide services for the student body and become future Lasallian entrepreneurs.
+                <br/><br/>Since the pandemic, SCoOp has resumed various services such as paper and tarpaulin printing, lamination, and ring binding to DLSU students and offices.
+                <br/><br/>SCoOp also conducts in-person and virtual internal events, including general assemblies, game nights, and personal development seminars for its members.
+            </div>
+            <div class="photos">
+                <img src="pic-cutting.jpg">
+                <img src="pic-meeting.jpg">
+                <img src="pic-orders.jpg">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

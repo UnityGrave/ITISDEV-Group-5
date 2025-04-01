@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLSU SCoOp Home</title>
+    <title>File Upload - DLSU SCoOp</title>
 
     <!-- Import Noto Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
@@ -24,7 +24,6 @@
             background: transparent;
             padding: 50px;
             border-radius: 12px;
-            /*box-shadow: 8px 8px 16px rgba(0,0,0,0.1);*/
             max-width: 900px;
         }
         .left-content {
@@ -58,10 +57,8 @@
         .btn:hover {
             background: #ddd;
         }
-
-        .info {
-            font-size: 14px;
-            color: black;
+        .file-upload {
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -74,17 +71,13 @@
             <p class="info"><strong>EMAIL:</strong> SCOOP@DLSU.EDU.PH</p>
         </div>
 
-        <!-- Right Side: Login and Social Media -->
+        <!-- Right Side: File Upload Form -->
         <div class="right-content">
-            <button class="btn" onclick="location.href='login.html'">Login</button>
-            <button class="btn" onclick="location.href='signup.html'">Sign Up</button>
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" class="file-upload">
+                <button type="submit" class="btn">Upload File</button>
+            </form>
         </div>
     </div>
-
-    <script>
-        function signup() {
-            alert("Sign up clicked");
-        }
-    </script>
 </body>
 </html>
