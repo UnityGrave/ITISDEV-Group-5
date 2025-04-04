@@ -12,181 +12,174 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-      /* Custom styles */
+        /* Custom styles */
         body {
-        background-color: #d9dbc9;
-        color: #333333;
+            background-color: #d9dbc9;
+            color: #333333;
         }
 
         .admin-title {
-        font-family: 'Quattrocento', serif;
+            font-family: 'Quattrocento', serif;
         }
 
         .nav-button {
-        font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', serif;
         }
 
         .order-quantity {
-        font-family: 'Garamond', serif;
+            font-family: 'Garamond', serif;
         }
 
         .order-details {
-        font-family: 'Quattrocento', serif;
+            font-family: 'Quattrocento', serif;
         }
 
         .container-bg {
-        background-color: #f1ebe5;
+            background-color: #f1ebe5;
         }
 
         .card-bg {
-        background-color: #f9f6f0;
+            background-color: #f9f6f0;
         }
     </style>
 
     <script>
-      // Tailwind Config
+        // Tailwind Config
         tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                background: '#d9dbc9',
-                container: '#f1ebe5',
-                card: '#f9f6f0',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#d9dbc9',
+                        container: '#f1ebe5',
+                        card: '#f9f6f0',
+                    }
                 }
             }
-        }
-        }
+        };
 
-      // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
-        const dropdownButton = document.getElementById('adminDropdownBtn');
-        const dropdownMenu = document.getElementById('adminDropdownMenu');
+        // Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownButton = document.getElementById('adminDropdownBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
 
-        dropdownButton.addEventListener('click', function() {
-            dropdownMenu.classList.toggle('hidden');
-        });
+            dropdownButton.addEventListener('click', function () {
+                dropdownMenu.classList.toggle('hidden');
+            });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
-            dropdownMenu.classList.add('hidden');
-            }
-        });
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (event) {
+                if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
         });
 
         // Logout functionality
         document.addEventListener('DOMContentLoaded', () => {
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-        // Optionally clear session data here before redirecting
-        window.location.href = 'login.html';
-            });
-        }
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    // Optionally clear session data here before redirecting
+                    window.location.href = 'login.html';
+                });
+            }
         });
 
+        // Helper to calculate total price for an order
         function getTotalPrice(product, quantity) {
-    const prices = {
-      "Regular Printing": 5,
-      "One-sided Laminated ID/Nametag (3R)": 15,
-      "Back-to-back Laminated ID/Nametag (3R)": 25,
-      "1/4 size Lamination": 10,
-      "1/2 size Lamination": 20,
-      "1 whole size Lamination": 35,
-      "Certificate Printing (Letter)": 20,
-      "Matte Sticker Paper Printing (A4)": 50,
-      "Glossy Sticker Paper Printing (A4)": 55,
-      "Matte Board Printing (A4)": 75,
-      "Perforated Ticket Printing": 30,
-      "Poster Printing (A4)": 40
-    };
-    return (prices[product] || 0) * quantity;
-  }
+            const prices = {
+                "Regular Printing": 5,
+                "One-sided Laminated ID/Nametag (3R)": 15,
+                "Back-to-back Laminated ID/Nametag (3R)": 25,
+                "1/4 size Lamination": 10,
+                "1/2 size Lamination": 20,
+                "1 whole size Lamination": 35,
+                "Certificate Printing (Letter)": 20,
+                "Matte Sticker Paper Printing (A4)": 50,
+                "Glossy Sticker Paper Printing (A4)": 55,
+                "Matte Board Printing (A4)": 75,
+                "Perforated Ticket Printing": 30,
+                "Poster Printing (A4)": 40
+            };
+            return (prices[product] || 0) * quantity;
+        }
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/orders');
-      if (!response.ok) throw new Error("Network response was not ok");
-      const orders = await response.json();
-      const container = document.getElementById('recentOrders');
-      container.innerHTML = ""; // Clear any static content
+        // Fetch and render the 5 most recent orders
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/orders');
+                if (!response.ok) throw new Error("Network response was not ok");
+                const orders = await response.json();
+                const container = document.getElementById('recentOrders');
+                container.innerHTML = ""; // Clear any static content
 
-      orders.forEach(order => {
-        // Calculate the price using the order's product and quantity
-        const totalPrice = getTotalPrice(order.product, order.quantity);
-        const orderItem = document.createElement('div');
-        orderItem.className = "border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg";
-        orderItem.innerHTML = `
-          <div class="flex items-start">
-            <span class="order-quantity font-bold mr-3">${order.quantity}x</span>
-            <div class="flex flex-col">
-              <span class="order-details">Size: ${order.product}</span>
-              <span class="text-sm text-gray-600">${order.name}</span>
-            </div>
-          </div>
-          <span class="font-medium">₱${totalPrice}</span>
-        `;
-        container.appendChild(orderItem);
-      });
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-    }
-  });
+                // Only keep the 5 most recent orders (assuming they are sorted by recency)
+                const recentOrders = orders.slice(0, 5);
 
+                recentOrders.forEach(order => {
+                    // Calculate the price using the order's product and quantity
+                    const totalPrice = getTotalPrice(order.product, order.quantity);
+                    const orderItem = document.createElement('div');
+                    orderItem.className = "border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg";
+                    orderItem.innerHTML = `
+                        <div class="flex items-start">
+                            <span class="order-quantity font-bold mr-3">${order.quantity}x</span>
+                            <div class="flex flex-col">
+                                <span class="order-details">Size: ${order.product}</span>
+                                <span class="text-sm text-gray-600">${order.name}</span>
+                            </div>
+                        </div>
+                        <span class="font-medium">₱${totalPrice}</span>
+                    `;
+                    container.appendChild(orderItem);
+                });
+            } catch (err) {
+                console.error("Error fetching orders:", err);
+            }
+        });
     </script>
 </head>
 <body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
     <div class="self-end mb-6">
         <div class="relative">
-        <button id="adminDropdownBtn"
-            class="px-4 py-2 border border-gray-400 rounded flex items-center">
-            Admin <span class="ml-2">▼</span>
-        </button>
-        <div
-            id="adminDropdownMenu"
-            class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden"
-        >
-        <button id="logoutBtn" class="w-full text-left px-4 py-2 hover:bg-gray-100">
-            Logout
-        </button>
+            <button id="adminDropdownBtn" class="px-4 py-2 border border-gray-400 rounded flex items-center">
+                Admin <span class="ml-2">▼</span>
+            </button>
+            <div id="adminDropdownMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+                <button id="logoutBtn" class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                    Logout
+                </button>
+            </div>
         </div>
-    </div>
     </div>
 
     <div class="container mx-auto container-bg p-8 rounded-lg shadow-md">
-    <div class="flex flex-col md:flex-row gap-8">
-        <div class="md:w-1/2 flex flex-col items-center">
-        <h1 class="admin-title text-5xl md:text-6xl text-center mb-10">
-            Admin Dashboard
-        </h1>
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="md:w-1/2 flex flex-col items-center">
+                <h1 class="admin-title text-5xl md:text-6xl text-center mb-10">
+                    Admin Dashboard
+                </h1>
 
-        <div class="w-full flex flex-col gap-4 max-w-md">
-            <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='order_management.html'">
-            Order Management
-            </button>
-            <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='user_management.html'">
-            User Management
-            </button>
-            <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='reports.html'">
-            Reports
-            </button>
-        </div>
-        </div>
+                <div class="w-full flex flex-col gap-4 max-w-md">
+                    <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='order_management.html'">
+                        Order Management
+                    </button>
+                    <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='user_management.html'">
+                        User Management
+                    </button>
+                    <button class="nav-button w-full py-4 px-6 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold" onclick="location.href='reports.html'">
+                        Reports
+                    </button>
+                </div>
+            </div>
 
-        <div class="md:w-1/2">
-          <h2 class="admin-title text-xl mb-4">
-            Recent Orders
-          </h2>
-          <div id="recentOrders" class="card-bg p-4 rounded-md shadow-sm">
-            
-
-            
-
-            
-
-            
-
-            
+            <div class="md:w-1/2">
+                <h2 class="admin-title text-xl mb-4">
+                    Recent Orders
+                </h2>
+                <div id="recentOrders" class="card-bg p-4 rounded-md shadow-sm">
+                    <!-- Dynamic recent orders will be loaded here -->
+                </div>
             </div>
         </div>
     </div>
