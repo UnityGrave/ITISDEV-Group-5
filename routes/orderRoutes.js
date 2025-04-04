@@ -57,4 +57,16 @@ router.post("/submit", upload.single("file_upload"), async (req, res) => {
     }
 });
 
+// GET /api/orders - fetch all orders from MongoDB
+router.get("/", async (req, res) => {
+    try {
+      const orders = await Order.find({});
+      res.status(200).json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+  
+
 module.exports = router;
