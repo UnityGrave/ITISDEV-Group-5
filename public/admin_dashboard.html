@@ -102,7 +102,7 @@
       orderItem.className = "border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg";
 
       // Optional: If you have a price field, use it; otherwise, default to a placeholder value
-      const totalPrice = getTotalPrice(order.product, order.quantity);
+      const price = order.totalPrice ? `₱${order.totalPrice}` : "₱0.00";
 
       // Build the inner HTML of the order item to match the static design
       orderItem.innerHTML = `
@@ -113,7 +113,7 @@
             <span class="text-sm text-gray-600">${order.name}</span>
           </div>
         </div>
-        <span class="font-medium">${totaPrice}</span>
+        <span class="font-medium">${price}</span>
       `;
 
       container.appendChild(orderItem);
