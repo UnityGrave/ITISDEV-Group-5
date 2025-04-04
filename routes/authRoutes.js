@@ -8,7 +8,7 @@ const router = express.Router();
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
 // @access  Public
-router.post( //v5
+router.post(
     "/login",
     [
         check("email", "Please include a valid email").isEmail(),
@@ -40,7 +40,7 @@ router.post( //v5
 
             const payload = {
                 userId: user.id,
-                role: user.role,
+                role: user.role, // Include role in the JWT payload
             };
 
             jwt.sign(
@@ -49,7 +49,7 @@ router.post( //v5
                 { expiresIn: "1h" },
                 (err, token) => {
                     if (err) throw err;
-                    res.json({ token });
+                    res.json({ token, role: user.role }); // Send role in response
                 }
             );
 
@@ -59,6 +59,7 @@ router.post( //v5
         }
     }
 );
+
 
 
 module.exports = router;

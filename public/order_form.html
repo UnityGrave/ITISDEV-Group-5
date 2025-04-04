@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Form</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script>
-        function submitOrder(event) {
-            event.preventDefault();
-            alert("Your order has been successfully placed!");
-            document.getElementById("orderForm").reset();
-        }
-    </script>
     <style>
         body {
             font-family: 'Noto Sans', sans-serif;
@@ -24,7 +16,6 @@
             align-items: center;
             min-height: 100vh;
         }
-
         .container {
             width: 600px;
             background: white;
@@ -33,34 +24,28 @@
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
             margin: 40px auto;
         }
-
         .logo {
             width: 250px;
             display: block;
             margin-bottom: 5px;
             margin: 0 auto;
         }
-
         h2 {
             text-align: center;
             margin-bottom: 20px;
         }
-
         .form-row {
             display: flex;
-            gap: 40px; /* Space between columns */
+            gap: 40px;
         }
-
         .form-group {
-            flex: 1; /* Each field takes equal width */
+            flex: 1;
         }
-
         label {
             font-weight: bold;
             display: block;
             margin-top: 10px;
         }
-
         select, input, textarea {
             width: 100%;
             padding: 10px;
@@ -69,12 +54,10 @@
             border-radius: 5px;
             font-size: 16px;
         }
-
         textarea {
             resize: vertical;
             height: 75px;
         }
-
         button {
             width: 100%;
             padding: 12px;
@@ -87,20 +70,16 @@
             border-radius: 5px;
             vertical-align: middle;
         }
-
         button:hover {
             background-color: #333;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
         <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
         <h2>Place Your Order</h2>
-        <form id="orderForm" onsubmit="submitOrder(event)">
-            
-            <!-- First Row -->
+        <form id="orderForm" name="orderForm" enctype="multipart/form-data">
             <div class="form-row">
                 <div class="form-group">
                     <label for="product">Select Service:</label>
@@ -120,26 +99,21 @@
                         <option value="Poster Printing (A4)">Poster Printing (A4)</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" min="1" required>
                 </div>
             </div>
-
-            <!-- Second Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label for="paper_size">Select Paper Size:</label>
+                    <label for="size">Select Paper Size:</label>
                     <select id="size" name="size">
                         <option value="" disabled selected>Paper size</option>
                         <option value="Short/Letter">Short/Letter</option>
                         <option value="Long/Legal">Long/Legal</option>
                         <option value="A4">A4</option>
                     </select>
-                    <em>*This is for regular printing only.</em>
                 </div>
-
                 <div class="form-group">
                     <label for="color">Select Color for Printing:</label>
                     <select id="color" name="color" required>
@@ -149,56 +123,95 @@
                     </select>
                 </div>
             </div>
-
-            <!-- Third Row -->
             <div class="form-row">
                 <div class="form-group">
                     <label for="due_date">Due Date:</label>
                     <input type="date" id="due_date" name="due_date" required>
                 </div>
-
                 <div class="form-group">
                     <label for="name">Contact Name:</label>
                     <input type="text" id="name" name="name" required>
                 </div>
             </div>
-
-            <!-- Fourth Row -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="file_upload">Upload File to Print:</label>
-                    <form action="upload.php" method="post" enctype="multipart/form-data">
-                        <input type="file" name="file" class="file-upload">
-                        <button type="submit" class="btn">Upload File</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Fifth Row -->
             <div class="form-row">
                 <div class="form-group">
                     <label for="contact">Contact Number:</label>
                     <input type="tel" id="contact" name="contact" pattern="[0-9]{10,11}" required placeholder="09XXXXXXXXX">
                 </div>
-
                 <div class="form-group">
                     <label for="email">Email Address:</label>
                     <input type="email" id="email" name="email" required>
                 </div>
             </div>
-
-            <!-- Notes -->
             <label for="notes">Additional Notes:</label>
             <textarea id="notes" name="notes" placeholder="Enter any special requests..."></textarea>
 
-            <!-- Total Price -->
+            <label for="file_upload">Upload File to Print:</label>
+            <input type="file" id="file_upload" name="file_upload">
+
             <label for="totalPrice">Total Price:</label>
-            <div id="totalPrice" style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">P0</div>
+            <div id="totalPrice" style="font-size: 18px; font-weight: bold;">P0</div>
 
-            <!-- Submit Button -->
-            <button type="submit">Submit Order</button>
+            <button type="button" id="submitBtn">Submit Order</button>
         </form>
+        <div id="responseMessage"></div>
     </div>
+    <script>
+        document.getElementById("submitBtn").addEventListener("click", async function (e) {
+            e.preventDefault(); // Prevent form from submitting the default way
 
+            const form = document.forms["orderForm"];
+            const formData = new FormData(form);
+
+            const plainData = {};
+            formData.forEach((value, key) => {
+                plainData[key] = value;
+            });
+
+            plainData.totalPrice = calculateTotalPrice();
+
+            try {
+                const response = await fetch("http://localhost:5000/api/orders/submit", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("responseMessage").innerHTML = `<p style="color: green;">${result.msg || "Order submitted successfully!"}</p>`;
+                } else {
+                    document.getElementById("responseMessage").innerHTML = `<p style="color: red;">${result.msg || "Failed to submit order."}</p>`;
+                }
+            } catch (err) {
+                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Failed to submit order.</p>`;
+                console.error(err);
+            }
+        });
+
+        function calculateTotalPrice() {
+            const prices = {
+                "Regular Printing": 5,
+                "One-sided Laminated ID/Nametag (3R)": 15,
+                "Back-to-back Laminated ID/Nametag (3R)": 25,
+                "1/4 size Lamination": 10,
+                "1/2 size Lamination": 20,
+                "1 whole size Lamination": 35,
+                "Certificate Printing (Letter)": 20,
+                "Matte Sticker Paper Printing (A4)": 50,
+                "Glossy Sticker Paper Printing (A4)": 55,
+                "Matte Board Printing (A4)": 75,
+                "Perforated Ticket Printing": 30,
+                "Poster Printing (A4)": 40
+            };
+            const product = document.getElementById("product").value;
+            const quantity = parseInt(document.getElementById("quantity").value) || 0;
+            const total = (prices[product] || 0) * quantity;
+            document.getElementById("totalPrice").innerText = `P${total}`;
+            return total;
+        }
+
+        document.getElementById("product").addEventListener("change", calculateTotalPrice);
+        document.getElementById("quantity").addEventListener("input", calculateTotalPrice);
+    </script>
 </body>
 </html>
