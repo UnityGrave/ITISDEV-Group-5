@@ -112,38 +112,44 @@
 
     <script>
         async function login() {
-            let email = document.getElementById("email").value;
-            let password = document.getElementById("password").value;
-    
-            // Create login request data
-            const requestData = {
-                email: email,
-                password: password
-            };
-    
-            try {
-                const response = await fetch("http://localhost:5000/api/auth/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(requestData)
-                });
-    
-                const data = await response.json();
-    
-                if (response.ok) {
-                    alert("Login successful!");
-                    localStorage.setItem("token", data.token); // Store token
-                    window.location.href = "dashboard.html"; // Redirect after login
-                } else {
-                    alert(data.msg || "Invalid credentials. Try again.");
-                }
-            } catch (error) {
-                console.error("Login error:", error);
-                alert("Error logging in. Please try again.");
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+
+    const requestData = {
+        email: email,
+        password: password
+    };
+
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Login successful!");
+            localStorage.setItem("token", data.token); // Store token
+            
+            // Check user role and redirect accordingly
+            if (data.role === "admin") {
+                window.location.href = "admin_dashboard.html"; 
+            } else {
+                window.location.href = "dashboard.html"; 
             }
+        } else {
+            alert(data.msg || "Invalid credentials. Try again.");
         }
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Error logging in. Please try again.");
+    }
+}
+
     </script>
     
 </body>

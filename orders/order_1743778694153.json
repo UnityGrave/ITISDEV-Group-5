@@ -1,0 +1,12 @@
+{
+  "product": "1/4 size Lamination",
+  "quantity": "11",
+  "name": "Test CustomerB",
+  "contact": "09303013030",
+  "email": "customerb@test.com",
+  "due_date": "2025-04-11",
+  "notes": "New order_form.html. I need this to not redirect to json. test again\r\nThis is the third try. Lucky 10",
+  "uploadedFilePath": "/uploads/1743778694153.jpg",
+  "fileOriginalName": "gray.jpg",
+  "fileMimeType": "image/jpeg"
+}

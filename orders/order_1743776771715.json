@@ -1,0 +1,12 @@
+{
+  "product": "Matte Board Printing (A4)",
+  "quantity": "3",
+  "name": "Test CustomerB",
+  "contact": "09303013030",
+  "email": "customerb@test.com",
+  "due_date": "2025-04-11",
+  "notes": "i need file upload to appear in mongo",
+  "uploadedFilePath": "/uploads/1743776771712.jpg",
+  "fileOriginalName": "noelle sheesh.jpg",
+  "fileMimeType": "image/jpeg"
+}

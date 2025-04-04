@@ -1,67 +1,109 @@
 const express = require("express");
-const connectDB = require("./config/db"); // Load DB connection
+const connectDB = require("./config/db");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const path = require("path");
-const User = require("./models/User"); // Ensure User model is imported
-const bcrypt = require("bcryptjs"); //v5
+const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const fs = require("fs");
 
+const User = require("./models/User");
 
-// Load environment variables
 dotenv.config();
-
-// Connect to MongoDB (Ensures it's called once)
 connectDB();
 
-// Initialize Express
 const app = express();
-
-// Middleware
-app.use(cors());
 app.use(express.json());
-
-// Routes
-app.use("/api/auth", require("./routes/authRoutes"));
-
-// Serve static frontend files
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Serve homepage.html as the default page
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "homepage.html"));
 });
 
-// Signup API (Ensure it’s only defined once)
-app.post("/api/auth/signup", async (req, res) => {
-    console.log("🔹 Signup request received:", req.body);
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
 
+app.get('/admin_dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin_dashboard.html'));
+});
+
+// 👇 Handle auth routes
+app.use("/api/auth", require("./routes/authRoutes"));
+
+// 👇 Handle order routes (which include the file upload handling now)
+app.use("/api/orders", require("./routes/orderRoutes"));
+
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+// Updated storage logic for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./uploads/");
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
+
+// Unified route: handle both order and file upload
+app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) => {
     try {
-        // Hash the password before storing it
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        const { product, quantity, name, contact, email, due_date, notes } = req.body;
 
-        const newUser = new User({
-            fullName: req.body.fullName,
-            email: req.body.email,
-            password: hashedPassword, // Store hashed password
-            phoneNumber: req.body.phoneNumber,
-            role: req.body.role,
-        });
+        if (!product || !quantity || !name || !contact || !email || !due_date) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
 
-        await newUser.save();
-        console.log("✅ User saved successfully:", newUser);
+        // File info (if uploaded)
+        let fileData = {};
+        if (req.file) {
+            fileData = {
+                uploadedFilePath: `/uploads/${req.file.filename}`,
+                fileOriginalName: req.file.originalname,
+                fileMimeType: req.file.mimetype,
+            };
+        }
 
-        res.status(201).json({ msg: "User registered successfully!" });
+        // Full order object
+        const orderData = {
+            product,
+            quantity,
+            name,
+            contact,
+            email,
+            due_date,
+            notes,
+            ...fileData,
+        };
+
+        // Save JSON file in "orders/" folder
+        const orderFileName = `order_${Date.now()}.json`;
+        const orderFilePath = `./orders/${orderFileName}`;
+        fs.writeFileSync(orderFilePath, JSON.stringify(orderData, null, 2));
+
+        // Add file path to DB
+        orderData.filePath = orderFilePath;
+
+        // Save to MongoDB
+        const newOrder = new Order(orderData);
+        await newOrder.save();
+
+        res.status(201).json({ msg: "Order submitted with file!", order: newOrder });
     } catch (error) {
-        console.error("❌ Error saving user:", error);
-        res.status(500).json({ msg: "Server error. Could not save user." });
+        console.error("❌ Error submitting order:", error);
+        res.status(500).json({ msg: "Server error. Order not stored." });
     }
 });
 
-// Prevent "favicon.ico" errors
-app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
