@@ -68,5 +68,22 @@ router.get("/", async (req, res) => {
     }
   });
   
+// PUT /api/orders/:id - update an order
+router.put("/:id", async (req, res) => {
+    try {
+      const updatedOrder = await Order.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+      if (!updatedOrder) {
+        return res.status(404).json({ msg: "Order not found" });
+      }
+      res.status(200).json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ msg: "Server error" });
+    }
+  });
 
 module.exports = router;
