@@ -73,6 +73,17 @@
             }
         });
         });
+
+        // Logout functionality
+        document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+        // Optionally clear session data here before redirecting
+        window.location.href = 'login.html';
+    });
+  }
+});
     </script>
 </head>
 <body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
@@ -86,7 +97,7 @@
             id="adminDropdownMenu"
             class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden"
         >
-        <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+        <button id="logoutBtn" class="w-full text-left px-4 py-2 hover:bg-gray-100">
             Logout
         </button>
         </div>
