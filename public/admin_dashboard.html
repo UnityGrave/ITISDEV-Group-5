@@ -81,66 +81,9 @@
             logoutBtn.addEventListener('click', () => {
         // Optionally clear session data here before redirecting
         window.location.href = 'login.html';
-            });
-        }
-        });
-
-        // Fetch recent orders from the API and populate the recent orders section
-        document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const response = await fetch('http://localhost:5000/api/orders');
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const orders = await response.json();
-    const container = document.getElementById('recentOrders');
-    container.innerHTML = ""; // Clear any static content
-
-    orders.forEach(order => {
-      // Create a new order item div using the same classes as the static design
-      const orderItem = document.createElement('div');
-      orderItem.className = "border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg";
-
-      // Optional: If you have a price field, use it; otherwise, default to a placeholder value
-      const price = order.totalPrice ? `₱${order.totalPrice}` : "₱0.00";
-
-      // Build the inner HTML of the order item to match the static design
-      orderItem.innerHTML = `
-        <div class="flex items-start">
-          <span class="order-quantity font-bold mr-3">${order.quantity}x</span>
-          <div class="flex flex-col">
-            <span class="order-details">Size: ${order.product}</span>
-            <span class="text-sm text-gray-600">${order.name}</span>
-          </div>
-        </div>
-        <span class="font-medium">${price}</span>
-      `;
-
-      container.appendChild(orderItem);
     });
-  } catch (err) {
-    console.error("Error fetching orders:", err);
   }
 });
-
-function getTotalPrice(product, quantity) {
-  const prices = {
-    "Regular Printing": 5,
-    "One-sided Laminated ID/Nametag (3R)": 15,
-    "Back-to-back Laminated ID/Nametag (3R)": 25,
-    "1/4 size Lamination": 10,
-    "1/2 size Lamination": 20,
-    "1 whole size Lamination": 35,
-    "Certificate Printing (Letter)": 20,
-    "Matte Sticker Paper Printing (A4)": 50,
-    "Glossy Sticker Paper Printing (A4)": 55,
-    "Matte Board Printing (A4)": 75,
-    "Perforated Ticket Printing": 30,
-    "Poster Printing (A4)": 40
-  };
-  return (prices[product] || 0) * quantity;
-}
-
     </script>
 </head>
 <body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
@@ -185,16 +128,60 @@ function getTotalPrice(product, quantity) {
           <h2 class="admin-title text-xl mb-4">
             Recent Orders
           </h2>
-          <div id="recentOrders" class="card-bg p-4 rounded-md shadow-sm">
-            
+          <div class="card-bg p-4 rounded-md shadow-sm">
+            <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+              <div class="flex items-start">
+                <span class="order-quantity font-bold mr-3">10x</span>
+                <div class="flex flex-col">
+                  <span class="order-details">Size: A4: Black</span>
+                  <span class="text-sm text-gray-600">Hannah Nicole Cosing</span>
+                </div>
+              </div>
+              <span class="font-medium">₱30.00</span>
+            </div>
 
-            
+            <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+              <div class="flex items-start">
+                <span class="order-quantity font-bold mr-3">07x</span>
+                <div class="flex flex-col">
+                  <span class="order-details">Size: A4: Black</span>
+                  <span class="text-sm text-gray-600">Hannah Nicole Cosing</span>
+                </div>
+              </div>
+              <span class="font-medium">₱21.00</span>
+            </div>
 
-            
+            <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+              <div class="flex items-start">
+                <span class="order-quantity font-bold mr-3">03x</span>
+                <div class="flex flex-col">
+                  <span class="order-details">Size: A4: Color</span>
+                  <span class="text-sm text-gray-600">Hannah Nicole Cosing</span>
+                </div>
+              </div>
+              <span class="font-medium">₱75.00</span>
+            </div>
 
-            
+            <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+              <div class="flex items-start">
+                <span class="order-quantity font-bold mr-3">04x</span>
+                <div class="flex flex-col">
+                  <span class="order-details">Size: A4: Color</span>
+                  <span class="text-sm text-gray-600">Hannah Nicole Cosing</span>
+                </div>
+              </div>
+              <span class="font-medium">₱100.00</span>
+            </div>
 
-            
+            <div class="border border-gray-200 p-3 mb-3 flex justify-between items-start card-bg">
+              <div class="flex items-start">
+                <span class="order-quantity font-bold mr-3">02x</span>
+                <div class="flex flex-col">
+                  <span class="order-details">Size: A4: Black</span>
+                  <span class="text-sm text-gray-600">Hannah Nicole Cosing</span>
+                </div>
+              </div>
+              <span class="font-medium">₱06.00</span>
             </div>
         </div>
     </div>
