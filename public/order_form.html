@@ -147,6 +147,17 @@
         button:hover {
             background-color: #333;
         }
+        .response-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .warning-message {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +187,9 @@
     <!-- Order form -->
     <div class="container">
         <h2>Place Your Order</h2>
+        <div id="fileUploadWarning" class="response-message warning-message" style="display: none;">
+            Please re-upload your file as it was not saved from the previous session.
+        </div>
         <form id="orderForm" name="orderForm" enctype="multipart/form-data">
             <div class="form-row">
                 <div class="form-group">
@@ -292,40 +306,28 @@
                 return;
             }
 
-            const form = document.forms["orderForm"];
-            const formData = new FormData(form);
-            const totalPrice = calculateTotalPrice();
-            formData.append('totalPrice', totalPrice);
+            // Store form data in localStorage
+            const formData = {
+                product: document.getElementById("product").value,
+                quantity: document.getElementById("quantity").value,
+                size: document.getElementById("size").value,
+                color: document.getElementById("color").value,
+                due_date: document.getElementById("due_date").value,
+                name: document.getElementById("name").value,
+                contact: document.getElementById("contact").value,
+                email: document.getElementById("email").value,
+                notes: document.getElementById("notes").value,
+                totalPrice: calculateTotalPrice()
+            };
 
-            try {
-                const response = await fetch("http://localhost:5000/api/orders/submit", {
-                    method: "POST",
-                    body: formData
-                });
-                const result = await response.json();
-
-                if (response.ok) {
-                    document.getElementById("responseMessage").innerHTML = `
-                        <div style="text-align: center;">
-                            <p style="color: green; margin-bottom: 15px;">${result.msg || "Order submitted successfully!"}</p>
-                            <div style="display: flex; gap: 10px; justify-content: center;">
-                                <button onclick="window.location.reload()" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    Order Again
-                                </button>
-                                <button onclick="window.location.href='dashboard.html'" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    Go to Dashboard
-                                </button>
-                            </div>
-                        </div>`;
-                    form.reset();
-                    document.getElementById("totalPrice").innerText = "P0";
-                } else {
-                    document.getElementById("responseMessage").innerHTML = `<p style="color: red;">${result.msg || "Failed to submit order."}</p>`;
-                }
-            } catch (err) {
-                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Failed to submit order.</p>`;
-                console.error(err);
+            // Handle file upload
+            const fileInput = document.getElementById("file_upload");
+            if (fileInput.files.length > 0) {
+                formData.fileName = fileInput.files[0].name;
             }
+
+            localStorage.setItem('orderData', JSON.stringify(formData));
+            window.location.href = 'order_confirmation.html';
         });
 
         // Add input validation for quantity
@@ -339,6 +341,23 @@
         document.addEventListener("DOMContentLoaded", function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById("due_date").min = today;
+
+            // Pre-fill form if returning from confirmation page
+            const orderData = localStorage.getItem('orderData');
+            if (orderData) {
+                const data = JSON.parse(orderData);
+                document.getElementById("product").value = data.product;
+                document.getElementById("quantity").value = data.quantity;
+                document.getElementById("size").value = data.size;
+                document.getElementById("color").value = data.color;
+                document.getElementById("due_date").value = data.due_date;
+                document.getElementById("name").value = data.name;
+                document.getElementById("contact").value = data.contact;
+                document.getElementById("email").value = data.email;
+                document.getElementById("notes").value = data.notes;
+                document.getElementById("fileUploadWarning").style.display = "block";
+                calculateTotalPrice();
+            }
         });
 
         function calculateTotalPrice() {
