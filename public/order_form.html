@@ -158,17 +158,47 @@
     </div>
     <script>
         document.getElementById("submitBtn").addEventListener("click", async function (e) {
-            e.preventDefault(); // Prevent form from submitting the default way
+            e.preventDefault();
+
+            // Validation checks
+            const dueDate = document.getElementById("due_date");
+            const quantity = document.getElementById("quantity");
+            const contact = document.getElementById("contact");
+            const email = document.getElementById("email");
+
+            // Date validation
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(dueDate.value);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Due date cannot be in the past.</p>`;
+                return;
+            }
+
+            // Quantity validation
+            if (parseInt(quantity.value) <= 0) {
+                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Quantity must be greater than 0.</p>`;
+                return;
+            }
+
+            // Contact number validation
+            if (!contact.value.match(/^[0-9]{10,11}$/)) {
+                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Please enter a valid 10 or 11-digit contact number.</p>`;
+                return;
+            }
+
+            // Email validation
+            if (!email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Please enter a valid email address.</p>`;
+                return;
+            }
 
             const form = document.forms["orderForm"];
             const formData = new FormData(form);
-
-            const plainData = {};
-            formData.forEach((value, key) => {
-                plainData[key] = value;
-            });
-
-            plainData.totalPrice = calculateTotalPrice();
+            const totalPrice = calculateTotalPrice();
+            formData.append('totalPrice', totalPrice);
 
             try {
                 const response = await fetch("http://localhost:5000/api/orders/submit", {
@@ -178,7 +208,20 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    document.getElementById("responseMessage").innerHTML = `<p style="color: green;">${result.msg || "Order submitted successfully!"}</p>`;
+                    document.getElementById("responseMessage").innerHTML = `
+                        <div style="text-align: center;">
+                            <p style="color: green; margin-bottom: 15px;">${result.msg || "Order submitted successfully!"}</p>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button onclick="window.location.reload()" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Order Again
+                                </button>
+                                <button onclick="window.location.href='dashboard.html'" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Go to Dashboard
+                                </button>
+                            </div>
+                        </div>`;
+                    form.reset();
+                    document.getElementById("totalPrice").innerText = "P0";
                 } else {
                     document.getElementById("responseMessage").innerHTML = `<p style="color: red;">${result.msg || "Failed to submit order."}</p>`;
                 }
@@ -186,6 +229,19 @@
                 document.getElementById("responseMessage").innerHTML = `<p style="color: red;">Failed to submit order.</p>`;
                 console.error(err);
             }
+        });
+
+        // Add input validation for quantity
+        document.getElementById("quantity").addEventListener("input", function(e) {
+            if (this.value < 1) {
+                this.value = 1;
+            }
+        });
+
+        // Set minimum date for due date input
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("due_date").min = today;
         });
 
         function calculateTotalPrice() {
