@@ -21,7 +21,7 @@ const OrderSchema = new mongoose.Schema({
   orderId: { type: String, unique: true }, // like #001, #002
   totalPrice: { type: Number, required: true },
   dateOrdered: { type: Date, default: Date.now },
-  status: { type: String, enum: ["processing", "completed", "cancelled"], default: "processing" },
+  status: { type: String, enum: ["pending", "processing", "completed", "cancelled"], default: "pending" },
 });
 
 module.exports = mongoose.model("Order", OrderSchema);
