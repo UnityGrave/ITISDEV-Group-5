@@ -97,8 +97,8 @@
       const pageOrders = filteredOrders.slice(startIdx, startIdx + pageSize);
       pageOrders.forEach(order => {
         const totalPrice = getTotalPrice(order.product, order.quantity);
-        const dateOrdered = new Date(order.createdAt).toISOString().split("T")[0];
-        const dueDate = new Date(order.due_date).toISOString().split("T")[0];  
+        const dateOrdered = new Date(order.createdAt).toLocaleDateString();
+        const dueDate = new Date(order.due_date).toLocaleDateString();
         const tr = document.createElement('tr');
         tr.className = "border-b border-gray-300 hover:bg-gray-100";
         tr.innerHTML = `
