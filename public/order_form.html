@@ -175,7 +175,18 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    document.getElementById("responseMessage").innerHTML = `<p style="color: green;">${result.msg || "Order submitted successfully!"}</p>`;
+                    document.getElementById("responseMessage").innerHTML = `
+                        <div style="text-align: center;">
+                            <p style="color: green; margin-bottom: 15px;">${result.msg || "Order submitted successfully!"}</p>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button onclick="window.location.reload()" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Order Again
+                                </button>
+                                <button onclick="window.location.href='admin_dashboard.html'" style="padding: 8px 16px; background-color: #4a4a4a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Go to Dashboard
+                                </button>
+                            </div>
+                        </div>`;
                     // Clear form after successful submission
                     form.reset();
                     document.getElementById("totalPrice").innerText = "P0";
