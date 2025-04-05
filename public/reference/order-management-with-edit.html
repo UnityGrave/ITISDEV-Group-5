@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DLSU SCoOp - Order Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body { background-color: #d9dbc9; color: #333333; }
+    .page-title { font-family: 'Quattrocento', serif; }
+    .nav-button { font-family: 'Cormorant Garamond', serif; }
+    .order-quantity { font-family: 'Garamond', serif; }
+    .order-details { font-family: 'Quattrocento', serif; }
+    .container-bg { background-color: #f1ebe5; }
+    .card-bg { background-color: #f9f6f0; }
+    .table-header { font-family: 'Quattrocento', serif; font-weight: bold; cursor: pointer; }
+    .table-data { font-family: 'Quattrocento', serif; }
+    .status-badge { font-family: 'Garamond', serif; font-weight: bold; }
+    .form-label { font-family: 'Quattrocento', serif; font-weight: bold; }
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 50; }
+    .hidden { display: none; }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { background: '#d9dbc9', container: '#f1ebe5', card: '#f9f6f0', } } }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Admin Dropdown Functionality
+      const adminDropdownBtn = document.getElementById('adminDropdownBtn');
+      const adminDropdownMenu = document.getElementById('adminDropdownMenu');
+      adminDropdownBtn.addEventListener('click', function() { adminDropdownMenu.classList.toggle('hidden'); });
+      
+      // Status Filter Dropdown and Filtering Functionality
+      const statusFilterBtn = document.getElementById('statusFilterBtn');
+      const statusFilterMenu = document.getElementById('statusFilterMenu');
+      statusFilterBtn.addEventListener('click', function() { statusFilterMenu.classList.toggle('hidden'); });
+      
+      // Attach event listeners to each status filter option
+      statusFilterMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const selectedStatus = this.innerText.trim();
+          filterByStatus(selectedStatus);
+          statusFilterMenu.classList.add('hidden');
+        });
+      });
+      
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!adminDropdownBtn.contains(event.target) && !adminDropdownMenu.contains(event.target)) {
+          adminDropdownMenu.classList.add('hidden');
+        }
+        if (!statusFilterBtn.contains(event.target) && !statusFilterMenu.contains(event.target)) {
+          statusFilterMenu.classList.add('hidden');
+        }
+      });
+      
+      // Search Functionality: Filter table rows based on search input
+      const searchInput = document.querySelector('input[placeholder="Search orders..."]');
+      searchInput.addEventListener('input', function() {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(row => {
+          const rowText = row.innerText.toLowerCase();
+          row.style.display = rowText.includes(term) ? '' : 'none';
+        });
+      });
+      
+      // Date Range Filtering (Simple Prompt Version)
+      const dateRangeBtn = document.querySelector('button.nav-button:nth-child(2)');
+      dateRangeBtn.addEventListener('click', function() {
+        const start = prompt("Enter start date (YYYY-MM-DD):");
+        const end = prompt("Enter end date (YYYY-MM-DD):");
+        if (start && end) { filterByDateRange(start, end); }
+      });
+      
+      // Sorting Functionality: attach sort events to Date Ordered, Due Date, and Status headers
+      const headers = document.querySelectorAll('.table-header');
+      // Column index mapping: 4 - Date Ordered, 5 - Due Date, 6 - Status
+      headers.forEach((header, index) => {
+        if ([4, 5, 6].includes(index)) {
+          header.addEventListener('click', function() {
+            // Toggle sort order
+            const currentOrder = header.getAttribute('data-order') || 'asc';
+            const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+            header.setAttribute('data-order', newOrder);
+            sortTableByColumn(index, newOrder, index === 6 ? 'string' : 'date');
+          });
+        }
+      });
+      
+      // Edit Order Modal Functionality
+      const editButtons = document.querySelectorAll('.edit-order-btn');
+      const editModal = document.getElementById('editOrderModal');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      
+      editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const orderId = this.getAttribute('data-order-id');
+          const customer = this.getAttribute('data-customer');
+          const product = this.getAttribute('data-product');
+          const quantity = this.getAttribute('data-quantity');
+          const dateOrdered = this.getAttribute('data-date-ordered');
+          const dueDate = this.getAttribute('data-due-date');
+          const status = this.getAttribute('data-status');
+          
+          document.getElementById('editOrderId').value = orderId;
+          document.getElementById('editCustomer').value = customer;
+          document.getElementById('editProduct').value = product;
+          document.getElementById('editQuantity').value = quantity.replace('x', '');
+          document.getElementById('editDateOrdered').value = formatDateForInput(dateOrdered);
+          document.getElementById('editDueDate').value = formatDateForInput(dueDate);
+          document.getElementById('editStatus').value = status;
+          
+          editModal.classList.remove('hidden');
+        });
+      });
+      
+      closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+      cancelModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+      editModal.addEventListener('click', function(event) {
+        if (event.target === editModal) { editModal.classList.add('hidden'); }
+      });
+      
+      // Edit Form Submission: update the table row with new values
+      const editOrderForm = document.getElementById('editOrderForm');
+      editOrderForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(editOrderForm);
+        const orderData = {
+          id: formData.get('orderId'),
+          customer: formData.get('customer'),
+          product: formData.get('product'),
+          quantity: formData.get('quantity'),
+          dateOrdered: formData.get('dateOrdered'),
+          dueDate: formData.get('dueDate'),
+          status: formData.get('status')
+        };
+        
+        // Update the matching table row
+        updateTableRow(orderData);
+        
+        // Show success message
+        const successAlert = document.getElementById('successAlert');
+        successAlert.classList.remove('hidden');
+        setTimeout(function() {
+          successAlert.classList.add('hidden');
+          editModal.classList.add('hidden');
+        }, 3000);
+      });
+      
+      // Helper: Update table row based on orderData
+      function updateTableRow(orderData) {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const orderIdCell = row.cells[0];
+          if (orderIdCell && orderIdCell.innerText.trim() === orderData.id) {
+            row.cells[1].innerText = orderData.customer;
+            row.cells[2].innerText = orderData.product;
+            row.cells[3].innerText = orderData.quantity + 'x';
+            row.cells[4].innerText = formatDateForDisplay(orderData.dateOrdered);
+            row.cells[5].innerText = formatDateForDisplay(orderData.dueDate);
+            // Update status badge
+            const statusCell = row.cells[6];
+            statusCell.innerHTML = `<span class="status-badge px-2 py-1 rounded-full text-sm">${orderData.status}</span>`;
+            
+            // Also update the data attributes on the edit button
+            const editBtn = row.cells[7].querySelector('.edit-order-btn');
+            editBtn.setAttribute('data-customer', orderData.customer);
+            editBtn.setAttribute('data-product', orderData.product);
+            editBtn.setAttribute('data-quantity', orderData.quantity + 'x');
+            editBtn.setAttribute('data-date-ordered', formatDateForDisplay(orderData.dateOrdered));
+            editBtn.setAttribute('data-due-date', formatDateForDisplay(orderData.dueDate));
+            editBtn.setAttribute('data-status', orderData.status);
+          }
+        });
+      }
+      
+      // Helper: Format date (from YYYY-MM-DD to MM/DD/YYYY)
+      function formatDateForDisplay(dateString) {
+        const parts = dateString.split('-');
+        return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
+      }
+      
+      // Helper: Format date for input (from MM/DD/YYYY to YYYY-MM-DD)
+      function formatDateForInput(dateString) {
+        const parts = dateString.split('/');
+        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      }
+      
+      // Function: Filter table rows by status
+      function filterByStatus(status) {
+        document.querySelectorAll('tbody tr').forEach(row => {
+          if (status === "All") {
+            row.style.display = "";
+          } else {
+            // Check the status cell text (remove extra whitespace)
+            const cellStatus = row.cells[6].innerText.trim();
+            row.style.display = cellStatus === status ? "" : "none";
+          }
+        });
+      }
+      
+      // Function: Filter table rows by a date range (based on Date Ordered)
+      function filterByDateRange(start, end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        document.querySelectorAll('tbody tr').forEach(row => {
+          const dateText = row.cells[4].innerText; // Date Ordered column
+          const [month, day, year] = dateText.split('/');
+          const orderDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+          row.style.display = (orderDate >= startDate && orderDate <= endDate) ? "" : "none";
+        });
+      }
+      
+      // Function: Sort table by column
+      function sortTableByColumn(columnIndex, order, type) {
+        const tbody = document.querySelector('tbody');
+        const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+        
+        rowsArray.sort((a, b) => {
+          let cellA = a.cells[columnIndex].innerText.trim();
+          let cellB = b.cells[columnIndex].innerText.trim();
+          
+          if (type === 'date') {
+            cellA = new Date(cellA);
+            cellB = new Date(cellB);
+          } else if (type === 'string') {
+            cellA = cellA.toLowerCase();
+            cellB = cellB.toLowerCase();
+          }
+          
+          if (cellA < cellB) { return order === 'asc' ? -1 : 1; }
+          if (cellA > cellB) { return order === 'asc' ? 1 : -1; }
+          return 0;
+        });
+        
+        // Append sorted rows
+        rowsArray.forEach(row => tbody.appendChild(row));
+      }
+    });
+  </script>
+</head>
+<body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
+  <!-- Admin Dropdown - Top Right -->
+  <div class="self-end mb-6">
+    <div class="relative">
+      <button id="adminDropdownBtn" class="px-4 py-2 border border-gray-400 rounded flex items-center">
+        Admin <span class="ml-2">▼</span>
+      </button>
+      <div id="adminDropdownMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+        <button class="w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Alert -->
+  <div id="successAlert" class="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50 hidden">
+    <strong class="font-bold">Success!</strong>
+    <span class="block sm:inline"> Order updated successfully.</span>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container mx-auto container-bg p-8 rounded-lg shadow-md">
+    <!-- Back to Dashboard Button -->
+    <div class="mb-6">
+      <a href="index.html" class="inline-block">
+        <button class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </a>
+    </div>
+    
+    <!-- Page Title -->
+    <h1 class="page-title text-4xl md:text-5xl text-center mb-8">Order Management</h1>
+    
+    <!-- Filters and Search Row -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      <!-- Search Bar -->
+      <div class="w-full md:w-1/3">
+        <div class="relative">
+          <input type="text" placeholder="Search orders..." class="w-full px-4 py-2 border border-gray-300 rounded" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Filters -->
+      <div class="flex gap-4">
+        <!-- Status Filter -->
+        <div class="relative">
+          <button id="statusFilterBtn" class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+            Status <span class="ml-2">▼</span>
+          </button>
+          <div id="statusFilterMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">All</button>
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">Pending</button>
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">Processing</button>
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">Completed</button>
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">Cancelled</button>
+          </div>
+        </div>
+        
+        <!-- Date Range Filter -->
+        <button class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold">
+          Date Range
+        </button>
+      </div>
+    </div>
+    
+    <!-- Orders Table -->
+    <div class="card-bg p-4 rounded-md shadow-sm overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b-2 border-black">
+            <th class="table-header py-3 px-4 text-left">Order ID</th>
+            <th class="table-header py-3 px-4 text-left">Customer</th>
+            <th class="table-header py-3 px-4 text-left">Product</th>
+            <th class="table-header py-3 px-4 text-left">Quantity</th>
+            <th class="table-header py-3 px-4 text-left">Date Ordered</th>
+            <th class="table-header py-3 px-4 text-left">Due Date</th>
+            <th class="table-header py-3 px-4 text-left">Status</th>
+            <th class="table-header py-3 px-4 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Order Row 1 -->
+          <tr class="border-b border-gray-300 hover:bg-gray-100">
+            <td class="table-data py-3 px-4">#001</td>
+            <td class="table-data py-3 px-4">Juan Dela Cruz</td>
+            <td class="table-data py-3 px-4">A4 Black</td>
+            <td class="order-quantity py-3 px-4 font-bold">10x</td>
+            <td class="table-data py-3 px-4">03/28/2025</td>
+            <td class="table-data py-3 px-4">03/30/2025</td>
+            <td class="py-3 px-4">
+              <span class="status-badge bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">Processing</span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+                data-order-id="#001"
+                data-customer="Juan Dela Cruz"
+                data-product="A4 Black"
+                data-quantity="10x"
+                data-date-ordered="03/28/2025"
+                data-due-date="03/30/2025"
+                data-status="Processing">
+                Edit
+              </button>
+            </td>
+          </tr>
+          
+          <!-- Order Row 2 -->
+          <tr class="border-b border-gray-300 hover:bg-gray-100">
+            <td class="table-data py-3 px-4">#002</td>
+            <td class="table-data py-3 px-4">Maria Santos</td>
+            <td class="table-data py-3 px-4">A4 Color</td>
+            <td class="order-quantity py-3 px-4 font-bold">5x</td>
+            <td class="table-data py-3 px-4">03/27/2025</td>
+            <td class="table-data py-3 px-4">03/29/2025</td>
+            <td class="py-3 px-4">
+              <span class="status-badge bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">Completed</span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+                data-order-id="#002"
+                data-customer="Maria Santos"
+                data-product="A4 Color"
+                data-quantity="5x"
+                data-date-ordered="03/27/2025"
+                data-due-date="03/29/2025"
+                data-status="Completed">
+                Edit
+              </button>
+            </td>
+          </tr>
+          
+          <!-- Order Row 3 -->
+          <tr class="border-b border-gray-300 hover:bg-gray-100">
+            <td class="table-data py-3 px-4">#003</td>
+            <td class="table-data py-3 px-4">John Reyes</td>
+            <td class="table-data py-3 px-4">A3 Black</td>
+            <td class="order-quantity py-3 px-4 font-bold">2x</td>
+            <td class="table-data py-3 px-4">03/26/2025</td>
+            <td class="table-data py-3 px-4">03/28/2025</td>
+            <td class="py-3 px-4">
+              <span class="status-badge bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">Pending</span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+                data-order-id="#003"
+                data-customer="John Reyes"
+                data-product="A3 Black"
+                data-quantity="2x"
+                data-date-ordered="03/26/2025"
+                data-due-date="03/28/2025"
+                data-status="Pending">
+                Edit
+              </button>
+            </td>
+          </tr>
+          
+          <!-- Order Row 4 -->
+          <tr class="border-b border-gray-300 hover:bg-gray-100">
+            <td class="table-data py-3 px-4">#004</td>
+            <td class="table-data py-3 px-4">Hannah Nicole Casing</td>
+            <td class="table-data py-3 px-4">A4 Color</td>
+            <td class="order-quantity py-3 px-4 font-bold">4x</td>
+            <td class="table-data py-3 px-4">03/25/2025</td>
+            <td class="table-data py-3 px-4">03/27/2025</td>
+            <td class="py-3 px-4">
+              <span class="status-badge bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">Processing</span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+                data-order-id="#004"
+                data-customer="Hannah Nicole Casing"
+                data-product="A4 Color"
+                data-quantity="4x"
+                data-date-ordered="03/25/2025"
+                data-due-date="03/27/2025"
+                data-status="Processing">
+                Edit
+              </button>
+            </td>
+          </tr>
+          
+          <!-- Order Row 5 -->
+          <tr class="hover:bg-gray-100">
+            <td class="table-data py-3 px-4">#005</td>
+            <td class="table-data py-3 px-4">Hannah Nicole Casing</td>
+            <td class="table-data py-3 px-4">A4 Black</td>
+            <td class="order-quantity py-3 px-4 font-bold">2x</td>
+            <td class="table-data py-3 px-4">03/24/2025</td>
+            <td class="table-data py-3 px-4">03/26/2025</td>
+            <td class="py-3 px-4">
+              <span class="status-badge bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm">Cancelled</span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+                data-order-id="#005"
+                data-customer="Hannah Nicole Casing"
+                data-product="A4 Black"
+                data-quantity="2x"
+                data-date-ordered="03/24/2025"
+                data-due-date="03/26/2025"
+                data-status="Cancelled">
+                Edit
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Pagination (static for now) -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="text-sm table-data">Showing 1-5 of 24 orders</div>
+        <div class="flex gap-2">
+          <button class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm">Previous</button>
+          <button class="nav-button px-3 py-1 border border-black bg-[#d9dbc9] rounded hover:bg-gray-200 transition-colors font-bold text-sm">1</button>
+          <button class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm">2</button>
+          <button class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm">3</button>
+          <button class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm">Next</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex justify-end mt-6 gap-4">
+      <button class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold">Export Orders</button>
+      <button class="nav-button px-4 py-2 border-2 border-black bg-[#d9dbc9] hover:bg-gray-200 transition-colors font-bold">Add New Order</button>
+    </div>
+  </div>
+  
+  <!-- Edit Order Modal -->
+  <div id="editOrderModal" class="modal-backdrop hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 class="page-title text-xl font-semibold">Edit Order</h3>
+        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Modal Body -->
+      <div class="p-4">
+        <form id="editOrderForm">
+          <!-- Order ID (Hidden) -->
+          <input type="hidden" id="editOrderId" name="orderId" />
+          
+          <!-- Customer -->
+          <div class="mb-4">
+            <label for="editCustomer" class="form-label block mb-1">Customer</label>
+            <input type="text" id="editCustomer" name="customer" class="w-full px-3 py-2 border border-gray-300 rounded" required />
+          </div>
+          
+          <!-- Product -->
+          <div class="mb-4">
+            <label for="editProduct" class="form-label block mb-1">Product</label>
+            <select id="editProduct" name="product" class="w-full px-3 py-2 border border-gray-300 rounded" required>
+              <option value="A4 Black">A4 Black</option>
+              <option value="A4 Color">A4 Color</option>
+              <option value="A3 Black">A3 Black</option>
+              <option value="A3 Color">A3 Color</option>
+            </select>
+          </div>
+          
+          <!-- Quantity -->
+          <div class="mb-4">
+            <label for="editQuantity" class="form-label block mb-1">Quantity</label>
+            <input type="number" id="editQuantity" name="quantity" class="w-full px-3 py-2 border border-gray-300 rounded" min="1" required />
+          </div>
+          
+          <!-- Date Ordered -->
+          <div class="mb-4">
+            <label for="editDateOrdered" class="form-label block mb-1">Date Ordered</label>
+            <input type="date" id="editDateOrdered" name="dateOrdered" class="w-full px-3 py-2 border border-gray-300 rounded" required />
+          </div>
+          
+          <!-- Due Date -->
+          <div class="mb-4">
+            <label for="editDueDate" class="form-label block mb-1">Due Date</label>
+            <input type="date" id="editDueDate" name="dueDate" class="w-full px-3 py-2 border border-gray-300 rounded" required />
+          </div>
+          
+          <!-- Status -->
+          <div class="mb-4">
+            <label for="editStatus" class="form-label block mb-1">Status</label>
+            <select id="editStatus" name="status" class="w-full px-3 py-2 border border-gray-300 rounded" required>
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          
+          <!-- Form Buttons -->
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" id="cancelModalBtn" class="nav-button px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold">Cancel</button>
+            <button type="submit" class="nav-button px-4 py-2 border-2 border-black bg-[#d9dbc9] hover:bg-gray-200 transition-colors font-bold">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
