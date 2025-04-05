@@ -1,223 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <style>
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            background-color: #d9dbc9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid black;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4a4a4a;
-            color: white;
-            border: none;
-            font-size: 16px;
-            margin-top: 15px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #333;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #d9dbc9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 400px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid black;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .password-container {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4a4a4a;
+      color: white;
+      border: none;
+      font-size: 16px;
+      margin-top: 15px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #333;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Sign Up</h2>
-        <form id="signupForm">
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
+<div class="container">
+  <h2>Sign Up</h2>
+  <form id="signupForm">
+    <label for="name">Full Name:</label>
+    <input type="text" id="name" name="name" required/>
 
-            <label for="email">Email Address:</label>
-            <input type="email" id="email" name="email" required>
+    <label for="email">Email Address:</label>
+    <input type="email" id="email" name="email" required/>
 
-            <label for="password">Password:</label>
-            <div class="password-container">
-                <input type="password" id="password" name="password" required>
-                <span class="toggle-password" id="eye-icon" onclick="togglePassword()">👁️‍🗨️</span>
-            </div>
-
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" pattern="[0-9]{10,11}" required placeholder="09XXXXXXXXX">
-
-            <label for="role">Select Account Type:</label>
-            <select id="role" name="role" required>
-                <option value="" disabled selected>Select account type</option>
-                <option value="Customer">Customer</option>
-                <option value="Admin">Admin</option>
-            </select>
-
-            <button type="submit">Create Account</button>
-        </form>
+    <label for="password">Password:</label>
+    <div class="password-container">
+      <input type="password" id="password" name="password" required/>
+      <span class="toggle-password" id="eye-icon" onclick="togglePassword()">👁️‍🗨️</span>
     </div>
 
-    <script>
-        function togglePassword() {
-            var passwordInput = document.getElementById("password");
-            var eyeIcon = document.getElementById("eye-icon");
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                eyeIcon.textContent = "👁️";
-            } else {
-                passwordInput.type = "password";
-                eyeIcon.textContent = "👁️‍🗨️";
-            }
-        }
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" name="phone" pattern="[0-9]{10,11}" required placeholder="09XXXXXXXXX"/>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("Signup script is running...");
+    <label for="role">Select Account Type:</label>
+    <select id="role" name="role" required>
+      <option value="" disabled selected>Select account type</option>
+      <option value="Customer">Customer</option>
+      <option value="Admin">Admin</option>
+    </select>
 
-            document.getElementById("signupForm").addEventListener("submit", async function(event) {
-                event.preventDefault();
-                console.log("Signup form submitted!");
+    <button type="submit">Create Account</button>
+  </form>
+</div>
 
-                const formData = {
-                    fullName: document.getElementById("name").value,
-                    email: document.getElementById("email").value,
-                    password: document.getElementById("password").value,
-                    phoneNumber: document.getElementById("phone").value,
-                    role: document.getElementById("role").value.toLowerCase() // Ensure role is lowercase
-                };
-
-                console.log("Sending signup request:", formData);
-
-                try {
-                    const response = await fetch("http://localhost:5000/api/auth/signup", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(formData)
-                    });
-
-                    console.log("Response received:", response);
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.msg || "Signup failed. Please try again.");
-                    }
-
-                    const data = await response.json();
-                    console.log("Server response:", data);
-
-                    // Store the token in localStorage
-                    localStorage.setItem("token", data.token);
-                    
-                    // Redirect based on role
-                    if (data.role === "admin") {
-                        window.location.href = "admin_dashboard.html";
-                    } else {
-                        window.location.href = "dashboard.html";
-                    }
-                } catch (error) {
-                    console.error("Fetch error:", error);
-                    alert("An error occurred: " + error.message);
-                }
-            });
-        });
-
-        async function registerUser(event) {
-    event.preventDefault(); // Prevent page reload
-
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const phone = document.getElementById("phone").value;
-    const role = document.getElementById("role").value.toLowerCase();
-
-    const userData = {
-        fullName: name,
-        email: email,
-        password: password,
-        phoneNumber: phone,
-        role: role
-    };
-
-    try {
-        const response = await fetch("http://localhost:5000/api/auth/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(userData)
-        });
-
-        const text = await response.text(); // Get raw response
-
-        try {
-            const data = JSON.parse(text); // Try parsing JSON
-            console.log("Parsed JSON response:", data);
-
-            if (response.ok) {
-                alert("Account successfully created!");
-                document.getElementById("signupForm").reset();
-            } else {
-                alert("Signup failed: " + (data.msg || "Please try again."));
-            }
-        } catch (error) {
-            console.error("Response is not valid JSON:", text);
-            alert("Server error: Unexpected response format");
-        }
-    } catch (error) {
-        console.error("Error during signup:", error);
-        alert("An error occurred. Please try again later.");
+<script>
+  function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eye-icon");
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      eyeIcon.textContent = "👁️";
+    } else {
+      passwordInput.type = "password";
+      eyeIcon.textContent = "👁️‍🗨️";
     }
-}
+  }
 
-    </script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("signupForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = {
+        fullName: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        phoneNumber: document.getElementById("phone").value,
+        role: document.getElementById("role").value.toLowerCase()
+      };
+
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.msg || "Signup failed. Please try again.");
+        }
+
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+
+        // ✅ Show success alert before redirect
+        alert("Signup successful! Welcome, " + formData.fullName + "!");
+
+        // ✅ Redirect to appropriate dashboard
+        if (data.role === "admin") {
+          window.location.href = "admin_dashboard.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+
+      } catch (error) {
+        console.error("Signup error:", error);
+        alert("An error occurred: " + error.message);
+      }
+    });
+  });
+</script>
 
 </body>
 </html>

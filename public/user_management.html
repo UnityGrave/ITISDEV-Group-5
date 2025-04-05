@@ -1,55 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            background-color: #d9dbc9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            width: 70%;
-            background: #f9f6f0;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid black;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #d9dbc9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      background: #f9f6f0;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid black;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e3e0d3;
+    }
+
+    a {
+      text-decoration: none;
+      color: #0077cc;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    i {
+      color: gray;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>User Management</h2>
-        <table>
-            <tr>
-                <th>User</th>
-                <th>Order History</th>
-                <th>Contact</th>
-            </tr>
-            <tr>
-                <td>Juan Dela Cruz</td>
-                <td>5 Orders</td>
-                <td>juan@email.com</td>
-            </tr>
-        </table>
-    </div>
+  <div class="container">
+    <h2>User Management</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer Name</th>
+          <th>Order ID(s)</th>
+          <th>Contact Number</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <!-- Content will be injected by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const tableBody = document.getElementById("userTableBody");
+
+      try {
+        const res = await fetch("/api/users/with-orders");
+        const users = await res.json();
+
+        users.forEach(user => {
+          const orderLinks = user.orders.map(order => 
+            `<a href="/order-details.html?id=${order._id}">${order.orderId}</a>`
+          ).join(", ");
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${user.fullName}</td>
+            <td>${orderLinks || "<i>No orders</i>"}</td>
+            <td>${user.phoneNumber}</td>
+            <td>${user.email}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } catch (err) {
+        console.error("Error loading user orders:", err);
+        tableBody.innerHTML = "<tr><td colspan='4'>Failed to load data.</td></tr>";
+      }
+    });
+  </script>
 </body>
 </html>

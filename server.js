@@ -6,18 +6,34 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
+const mongoose = require("mongoose");
+
+// Routes
+const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const User = require("./models/User");
+const Order = require("./models/Order"); // make sure you have this
 
 dotenv.config();
 connectDB();
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static("uploads"));
 
+// ✅ Mount routes
+app.use("/api/users", userRoutes); // for user operations
+app.use("/api/auth", authRoutes); // for signup & login
+app.use("/api/orders", orderRoutes); // for order submissions
+
+// Serve frontend pages
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "homepage.html"));
 });
@@ -30,15 +46,9 @@ app.get('/admin_dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin_dashboard.html'));
 });
 
-// 👇 Handle auth routes
-app.use("/api/auth", require("./routes/authRoutes"));
-
-// 👇 Handle order routes (which include the file upload handling now)
-app.use("/api/orders", require("./routes/orderRoutes"));
-
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-// Updated storage logic for file uploads
+// ✅ File upload config
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "./uploads/");
@@ -54,7 +64,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-// Unified route: handle both order and file upload
+// ✅ Order submission route (with file upload)
 app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) => {
     try {
         const { product, quantity, name, contact, email, due_date, notes } = req.body;
@@ -63,7 +73,6 @@ app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) =>
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        // File info (if uploaded)
         let fileData = {};
         if (req.file) {
             fileData = {
@@ -73,7 +82,6 @@ app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) =>
             };
         }
 
-        // Full order object
         const orderData = {
             product,
             quantity,
@@ -85,15 +93,12 @@ app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) =>
             ...fileData,
         };
 
-        // Save JSON file in "orders/" folder
         const orderFileName = `order_${Date.now()}.json`;
         const orderFilePath = `./orders/${orderFileName}`;
         fs.writeFileSync(orderFilePath, JSON.stringify(orderData, null, 2));
 
-        // Add file path to DB
         orderData.filePath = orderFilePath;
 
-        // Save to MongoDB
         const newOrder = new Order(orderData);
         await newOrder.save();
 
@@ -104,6 +109,5 @@ app.post("/api/orders/submit", upload.single("file_upload"), async (req, res) =>
     }
 });
 
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
