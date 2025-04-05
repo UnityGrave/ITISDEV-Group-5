@@ -15,6 +15,80 @@
             height: 100vh;
             margin: 0;
         }
+        
+        .navbar {
+            width: 100%;
+            background-color: #7F9472;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 50px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }   
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo {
+            width: 160px;
+            height: auto;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 50px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: black;
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .icon-btn:focus, 
+        .icon-btn:active {
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        }    
+        
         .container {
             background: #f9f6f0;
             padding: 30px;
@@ -46,6 +120,30 @@
     </style>
 </head>
 <body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <img src="scoop logo.png" alt="Logo" class="nav-logo"> 
+        </div>
+        <div class="nav-title">DLSU SCoOp</div>
+        <div class="nav-buttons">
+            <a href="dashboard.html" class="icon-btn" aria-label="Back">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+
+            <a href="login.html" class="icon-btn" aria-label="Logout">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M15 3H21V21H15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 17L15 12L10 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 12H3" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main content -->
     <div class="container">
         <div class="title">Order Confirmation</div>
         <p class="info"><strong>Order Summary:</strong> Printing Order - 20 pages, B/W</p>
