@@ -158,6 +158,36 @@
             margin-bottom: 20px;
             display: none;
         }
+        .success-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .success-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            background-color: #4a4a4a;
+            color: white;
+        }
+        .success-btn:hover {
+            opacity: 0.9;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -184,16 +214,25 @@
         </div>
     </nav>
 
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        Order submitted successfully!
+    </div>
+
     <!-- Main content -->
     <div class="container">
         <div class="title">Order Confirmation</div>
         <div id="successMessage" class="success-message">
-            Order submitted successfully! Redirecting to dashboard...
+            <p>Would you like to place another order?</p>
+            <div class="success-buttons">
+                <button class="success-btn" onclick="window.location.href='order_form.html'">Yes, Order Again</button>
+                <button class="success-btn" onclick="window.location.href='dashboard.html'">No, Go to Dashboard</button>
+            </div>
         </div>
         <div id="orderDetails">
             <!-- Order details will be populated by JavaScript -->
         </div>
-        <div class="button-group">
+        <div id="button-group" class="button-group">
             <button class="action-btn edit-btn" onclick="window.location.href='order_form.html'">Edit Order</button>
             <button class="action-btn confirm-btn" onclick="submitOrder()">Confirm Order</button>
         </div>
@@ -256,11 +295,24 @@
                 const result = await response.json();
 
                 if (response.ok) {
+                    // Show toast notification
+                    const toast = document.getElementById('toast');
+                    toast.style.display = 'block';
+                    
+                    // Hide order details and action buttons
+                    document.getElementById('orderDetails').style.display = 'none';
+                    document.getElementById('button-group').style.display = 'none';
+                    
+                    // Show success message with options
                     document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Remove order data from localStorage
                     localStorage.removeItem('orderData');
+                    
+                    // Hide toast after 3 seconds
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                        toast.style.display = 'none';
+                    }, 3000);
                 } else {
                     alert(result.msg || "Failed to submit order. Please try again.");
                 }
