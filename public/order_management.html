@@ -251,15 +251,18 @@
       document.getElementById('editProduct').value = orderData.product;
       document.getElementById('editQuantity').value = orderData.quantity;
       
-      // Format dates for the date inputs
+      // Format date for the date input
       const formatDateForInput = (dateStr) => {
         const date = new Date(dateStr);
         return date.toISOString().split('T')[0];
       };
       
-      document.getElementById('editDateOrdered').value = formatDateForInput(orderData.dateOrdered);
       document.getElementById('editDueDate').value = formatDateForInput(orderData.dueDate);
       document.getElementById('editStatus').value = orderData.status;
+      
+      // Set minimum date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('editDueDate').min = today;
       
       modalBackdrop.classList.remove('hidden');
     }
@@ -382,6 +385,17 @@
       // Edit form submission
       document.getElementById('editOrderForm').addEventListener('submit', async function(event) {
         event.preventDefault();
+        
+        // Date validation
+        const dueDate = new Date(document.getElementById('editDueDate').value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (dueDate < today) {
+          alert('Due date cannot be in the past.');
+          return;
+        }
+
         const formData = new FormData(this);
         const quantity = parseInt(formData.get('quantity'));
         const product = formData.get('product');
@@ -391,7 +405,6 @@
           name: formData.get('customer'),
           product: product,
           quantity: quantity,
-          dateOrdered: formData.get('dateOrdered'),
           due_date: formData.get('dueDate'),
           status: formData.get('status'),
           totalPrice: totalPrice
@@ -587,10 +600,6 @@
         <div class="mb-4">
           <label for="editQuantity" class="block mb-1 font-bold">Quantity</label>
           <input type="number" id="editQuantity" name="quantity" class="w-full px-3 py-2 border border-gray-300 rounded" min="1" required />
-        </div>
-        <div class="mb-4">
-          <label for="editDateOrdered" class="block mb-1 font-bold">Date Ordered</label>
-          <input type="date" id="editDateOrdered" name="dateOrdered" class="w-full px-3 py-2 border border-gray-300 rounded" required />
         </div>
         <div class="mb-4">
           <label for="editDueDate" class="block mb-1 font-bold">Due Date</label>
