@@ -163,12 +163,9 @@
             const form = document.forms["orderForm"];
             const formData = new FormData(form);
 
-            const plainData = {};
-            formData.forEach((value, key) => {
-                plainData[key] = value;
-            });
-
-            plainData.totalPrice = calculateTotalPrice();
+            // Calculate total price
+            const totalPrice = calculateTotalPrice();
+            formData.append('totalPrice', totalPrice);
 
             try {
                 const response = await fetch("http://localhost:5000/api/orders/submit", {
@@ -179,6 +176,9 @@
 
                 if (response.ok) {
                     document.getElementById("responseMessage").innerHTML = `<p style="color: green;">${result.msg || "Order submitted successfully!"}</p>`;
+                    // Clear form after successful submission
+                    form.reset();
+                    document.getElementById("totalPrice").innerText = "P0";
                 } else {
                     document.getElementById("responseMessage").innerHTML = `<p style="color: red;">${result.msg || "Failed to submit order."}</p>`;
                 }

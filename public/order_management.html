@@ -97,16 +97,16 @@
       const pageOrders = filteredOrders.slice(startIdx, startIdx + pageSize);
       pageOrders.forEach(order => {
         const totalPrice = getTotalPrice(order.product, order.quantity);
-        const dateOrdered = new Date(order.createdAt).toLocaleDateString();
+        const dateOrdered = new Date(order.dateOrdered).toLocaleDateString();
         const dueDate = new Date(order.due_date).toLocaleDateString();
         const tr = document.createElement('tr');
         tr.className = "border-b border-gray-300 hover:bg-gray-100";
         tr.innerHTML = `
-          <td class="table-data py-3 px-4">${order._id}</td>
+          <td class="table-data py-3 px-4">${order.orderId}</td>
           <td class="table-data py-3 px-4">${order.name}</td>
           <td class="table-data py-3 px-4">${order.product}</td>
           <td class="table-data py-3 px-4">${order.quantity}x</td>
-          <td class="table-data py-3 px-4">₱${totalPrice}</td>
+          <td class="table-data py-3 px-4">₱${order.totalPrice}</td>
           <td class="table-data py-3 px-4">${dateOrdered}</td>
           <td class="table-data py-3 px-4">${dueDate}</td>
           <td class="table-data py-3 px-4">
@@ -115,10 +115,10 @@
           <td class="table-data py-3 px-4">
             <button class="edit-order-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
               data-order-id="${order._id}"
-              data-customer="${order.name}"
+              data-name="${order.name}"
               data-product="${order.product}"
               data-quantity="${order.quantity}"
-              data-date-ordered="${order.createdAt}"
+              data-date-ordered="${order.dateOrdered}"
               data-due-date="${order.due_date}"
               data-status="${order.status || 'Pending'}">
               Edit
@@ -228,7 +228,7 @@
       const modalBackdrop = document.getElementById('editModalBackdrop');
       // Fill in the form fields
       document.getElementById('editOrderId').value = orderData.id;
-      document.getElementById('editCustomer').value = orderData.customer;
+      document.getElementById('editCustomer').value = orderData.name;
       document.getElementById('editProduct').value = orderData.product;
       document.getElementById('editQuantity').value = orderData.quantity;
       
@@ -349,7 +349,7 @@
           const btn = e.target;
           const orderData = {
             id: btn.getAttribute('data-order-id'),
-            customer: btn.getAttribute('data-customer'),
+            name: btn.getAttribute('data-name'),
             product: btn.getAttribute('data-product'),
             quantity: btn.getAttribute('data-quantity'),
             dateOrdered: btn.getAttribute('data-date-ordered'),
@@ -365,17 +365,16 @@
         event.preventDefault();
         const formData = new FormData(this);
         const orderData = {
-          id: formData.get('orderId'),
-          customer: formData.get('customer'),
+          name: formData.get('customer'),
           product: formData.get('product'),
           quantity: parseInt(formData.get('quantity')),
           dateOrdered: formData.get('dateOrdered'),
-          dueDate: formData.get('dueDate'),
+          due_date: formData.get('dueDate'),
           status: formData.get('status')
         };
 
         try {
-          const response = await fetch(`http://localhost:5000/api/orders/${orderData.id}`, {
+          const response = await fetch(`http://localhost:5000/api/orders/${formData.get('orderId')}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
@@ -386,7 +385,7 @@
           if (!response.ok) throw new Error("Failed to update order");
 
           // Update local orders array
-          allOrders = allOrders.map(order => order._id === orderData.id ? { ...order, ...orderData } : order);
+          allOrders = allOrders.map(order => order._id === formData.get('orderId') ? { ...order, ...orderData } : order);
           filteredOrders = [...allOrders];
           renderTable();
 
