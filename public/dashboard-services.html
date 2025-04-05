@@ -5,107 +5,254 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLSU SCoOp - Services</title>
 
-        <!-- Import Noto Sans from Google Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Import Noto Sans from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 
-        <!-- Link to External CSS -->
-        <link rel="stylesheet" href="styles.css">
-        <style>
-            body {
-                font-family: 'Noto Sans', sans-serif;
-                background-color: #d9dbc9; 
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh; 
-                margin: 0;
-                padding: 30px;
-                box-sizing: border-box;
-            }
-            .container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                background: #f9f6f0;
-                padding: 20px;
-                border-radius: 12px;
-                max-width: 900px;
-                width: 90%;
-                min-height: 70vh;
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            }
-            .logo {
-                width: 250px;
-                display: block;
-                margin-bottom: 5px;
-                margin: 0 auto;
-            }
-            .content {
-                flex: 1;
-                background: #f9f6f0;
-                padding: 15px;
-                border-radius: 0px;
-                text-align: center;
-            }
-            .title{
-                font-size: 24px;
-                font-weight: bold;
-                margin-bottom: 20px;
-            }
-            .services {
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* Creates two equal columns */
-                gap: 10px 30px; /* Adds spacing between columns & rows */
-                text-align: left;
-                padding: 10px;
-                max-width: 700px; /* Keeps it compact */
-                margin: 0 auto; /* Centers the grid */
-            }
-            .services strong {
-                grid-column: span 2; /* Ensures headings span both columns */
-                margin-top: 30px;
-                margin: 0 auto;
-            }
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #d9dbc9; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
 
+        .navbar {
+            width: 100%;
+            background-color: #7F9472;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 50px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo {
+            width: 160px;
+            height: auto;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 50px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: black;
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .icon-btn:focus, 
+        .icon-btn:active {
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f9f6f0;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            min-height: 70vh;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 70px;
+        }
+
+        .logo {
+            width: 250px;
+            display: block;
+            margin-bottom: 5px;
+            margin: 0 auto;
+        }
+
+        .content {
+            flex: 1;
+            background: #f9f6f0;
+            padding: 15px;
+            border-radius: 0px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #7F9472;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f9f6f0;
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <img src="scoop logo.png" alt="Logo" class="nav-logo"> 
+        </div>
+        <div class="nav-title">DLSU SCoOp</div>
+        <div class="nav-buttons">
+            <a href="dashboard.html" class="icon-btn" aria-label="Back">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+
+            <a href="login.html" class="icon-btn" aria-label="Logout">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M15 3H21V21H15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 17L15 12L10 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 12H3" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main content -->
     <div class="container">
         <div class="content">
-            <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
-            <div class="text">
-                <p class="title"><strong>Services</strong></p>
-                <div class="services">
-                    <strong>Printing/Photocopy</strong>
-                    <li>Black & White - P2</li>
-                    <li>Colored - P3</li>
-                
-                    <strong>Laminated IDs & Nametags</strong>
-                    <li>3R One-sided - P30</li>
-                    <li>3R Back-to-back - P35</li>
-                
-                    <strong>Lamination</strong>
-                    <li>1/4 size - P15</li>
-                    <li>1/2 size - P20</li>
-                    <li>1 whole size - P25</li>
-                
-                    <strong>Certificate Printing</strong>
-                    <li>Letter size - P11</li>
-                
-                    <strong>Sticker Paper Printing</strong>
-                    <li>Matte sticker paper - P35</li>
-                    <li>Glossy sticker paper - P30</li>
-                
-                    <strong>Matte Board Printing</strong>
-                    <li>A4 size - P30</li>
-                
-                    <strong>Ticket Printing</strong>
-                    <li>Perforated paper - P11</li>
-                
-                    <strong>Poster Printing</strong>
-                    <li>A4 size - P35</li>
-                </div>                
-            </div>
+            <p class="title"><strong>Services</strong></p>
+
+            <!-- Services list/table -->
+            <table>
+                <tr>
+                    <th>Service</th>
+                    <th>Type</th>
+                    <th>Price (PHP)</th>
+                </tr>
+                <tr>
+                    <td rowspan="2">Regular printing</td>
+                    <td>Black & White</td>
+                    <td>₱2</td>
+                </tr>
+                <tr>
+                    <td>Colored</td>
+                    <td>₱3</td>
+                </tr>
+                <tr>
+                    <td rowspan="2">Laminated ID/Nametag (3R)</td>
+                    <td>One-sided</td>
+                    <td>₱30</td>
+                </tr>
+                <tr>
+                    <td>Back-to-back</td>
+                    <td>₱35</td>
+                </tr>
+                <tr>
+                    <td rowspan="3">Lamination</td>
+                    <td>1/4 size</td>
+                    <td>₱15</td>
+                </tr>
+                <tr>
+                    <td>1/2 size</td>
+                    <td>₱20</td>
+                </tr>
+                <tr>
+                    <td>1 whole size</td>
+                    <td>₱25</td>
+                </tr>
+                <tr>
+                    <td>Certificate printing</td>
+                    <td>Letter size</td>
+                    <td>₱11</td>
+                </tr>
+                <tr>
+                    <td rowspan="2">Sticker paper printing (A4)</td>
+                    <td>Matte sticker paper</td>
+                    <td>₱35</td>
+                </tr>
+                <tr>
+                    <td>Glossy sticker paper</td>
+                    <td>₱35</td>
+                </tr>
+                <tr>
+                    <td>Matte board printing</td>
+                    <td>A4 size</td>
+                    <td>₱30</td>
+                </tr>
+                <tr>
+                    <td>Ticket printing</td>
+                    <td>Perforated paper</td>
+                    <td>₱11</td>
+                </tr>
+                <tr>
+                    <td>Poster printing</td>
+                    <td>A4 size</td>
+                    <td>₱35</td>
+                </tr>
+            </table>
+
+            <p>For more inquiries, email dlsu.scoop.orders@gmail.com!</p>
         </div>
     </div>
 </body>
