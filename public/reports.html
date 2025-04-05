@@ -1,53 +1,809 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Reports</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            background-color: #d9dbc9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DLSU SCoOp - Sales Reports</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* Custom styles */
+    body {
+      background-color: #d9dbc9;
+      color: #333333;
+    }
+    
+    .page-title {
+      font-family: 'Quattrocento', serif;
+    }
+    
+    .nav-button {
+      font-family: 'Cormorant Garamond', serif;
+    }
+    
+    .section-title {
+      font-family: 'Quattrocento', serif;
+      font-weight: bold;
+    }
+    
+    .container-bg {
+      background-color: #f1ebe5;
+    }
+    
+    .card-bg {
+      background-color: #f9f6f0;
+    }
+    
+    .table-header {
+      font-family: 'Quattrocento', serif;
+      font-weight: bold;
+    }
+    
+    .table-data {
+      font-family: 'Quattrocento', serif;
+    }
+    
+    /* Modal backdrop */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    /* Hide elements with this class */
+    .hidden {
+      display: none;
+    }
+  </style>
+  
+  <script>
+    // Tailwind Config
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#d9dbc9',
+            container: '#f1ebe5',
+            card: '#f9f6f0',
+          }
         }
-        .container {
-            width: 70%;
-            background: #f9f6f0;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+      }
+    }
+    
+    // Sample data for reports
+    const sampleOrders = [
+      { date: '2025-03-28', product: 'Regular Printing', quantity: 50, totalSales: 250 },
+      { date: '2025-03-28', product: 'Certificate Printing (Letter)', quantity: 15, totalSales: 300 },
+      { date: '2025-03-28', product: 'Matte Sticker Paper Printing (A4)', quantity: 10, totalSales: 500 },
+      { date: '2025-03-27', product: 'Regular Printing', quantity: 35, totalSales: 175 },
+      { date: '2025-03-27', product: 'One-sided Laminated ID/Nametag (3R)', quantity: 20, totalSales: 300 },
+      { date: '2025-03-26', product: 'Poster Printing (A4)', quantity: 25, totalSales: 1000 },
+      { date: '2025-03-26', product: 'Back-to-back Laminated ID/Nametag (3R)', quantity: 30, totalSales: 750 },
+      { date: '2025-03-25', product: 'Regular Printing', quantity: 60, totalSales: 300 },
+      { date: '2025-03-25', product: '1 whole size Lamination', quantity: 12, totalSales: 420 },
+      { date: '2025-03-24', product: 'Perforated Ticket Printing', quantity: 100, totalSales: 3000 },
+    ];
+    
+    // Global variables for reports and filtering
+    let allCompletedOrders = [];
+    let filteredOrders = [];
+    let currentDateRange = {
+      start: new Date(new Date().setDate(new Date().getDate() - 30)), // Default to last 30 days
+      end: new Date()
+    };
+    
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+    
+    // Calculate total sales for a given date range
+    function calculateTotalSales(orders) {
+      return orders.reduce((total, order) => total + order.totalSales, 0);
+    }
+    
+    // Group orders by date and calculate daily totals
+    function groupOrdersByDate(orders) {
+      const grouped = {};
+      
+      orders.forEach(order => {
+        const date = order.date.split('T')[0]; // Extract just the date part
+        if (!grouped[date]) {
+          grouped[date] = {
+            date: date,
+            totalSales: 0,
+            orders: []
+          };
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        
+        grouped[date].totalSales += order.totalSales;
+        grouped[date].orders.push(order);
+      });
+      
+      return Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    
+    // Group orders by product and calculate product totals
+    function groupOrdersByProduct(orders) {
+      const grouped = {};
+      
+      orders.forEach(order => {
+        if (!grouped[order.product]) {
+          grouped[order.product] = {
+            product: order.product,
+            quantity: 0,
+            totalSales: 0
+          };
         }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid black;
-            text-align: center;
+        
+        grouped[order.product].quantity += order.quantity;
+        grouped[order.product].totalSales += order.totalSales;
+      });
+      
+      return Object.values(grouped).sort((a, b) => b.totalSales - a.totalSales);
+    }
+    
+    // Render the daily sales table
+    function renderDailySalesTable() {
+      const tbody = document.getElementById('dailySalesTableBody');
+      tbody.innerHTML = '';
+      
+      const groupedByDate = groupOrdersByDate(filteredOrders);
+      
+      groupedByDate.forEach(day => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-300 hover:bg-gray-100';
+        tr.innerHTML = `
+          <td class="table-data py-3 px-4">${formatDate(day.date)}</td>
+          <td class="table-data py-3 px-4 text-right">₱${day.totalSales.toLocaleString()}</td>
+          <td class="table-data py-3 px-4 text-center">
+            <button class="view-details-btn nav-button bg-[#f1ebe5] px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm"
+              data-date="${day.date}">
+              View Details
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    
+    // Render the product sales table
+    function renderProductSalesTable() {
+      const tbody = document.getElementById('productSalesTableBody');
+      tbody.innerHTML = '';
+      
+      const groupedByProduct = groupOrdersByProduct(filteredOrders);
+      
+      groupedByProduct.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-300 hover:bg-gray-100';
+        tr.innerHTML = `
+          <td class="table-data py-3 px-4">${product.product}</td>
+          <td class="table-data py-3 px-4 text-center">${product.quantity}</td>
+          <td class="table-data py-3 px-4 text-right">₱${product.totalSales.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    
+    // Update the summary section
+    function updateSummary() {
+      const totalSales = calculateTotalSales(filteredOrders);
+      const totalOrders = filteredOrders.length;
+      const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+      
+      document.getElementById('totalSalesValue').textContent = `₱${totalSales.toLocaleString()}`;
+      document.getElementById('totalOrdersValue').textContent = totalOrders;
+      document.getElementById('averageOrderValue').textContent = `₱${averageOrderValue.toFixed(2)}`;
+      
+      // Update date range display
+      document.getElementById('dateRangeDisplay').textContent = 
+        `${formatDate(currentDateRange.start)} - ${formatDate(currentDateRange.end)}`;
+    }
+    
+    // Render charts
+    function renderCharts() {
+      // Daily sales chart
+      const dailyData = groupOrdersByDate(filteredOrders);
+      const dailyLabels = dailyData.map(day => formatDate(day.date));
+      const dailyValues = dailyData.map(day => day.totalSales);
+      
+      const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+      if (window.dailySalesChart) {
+        window.dailySalesChart.destroy();
+      }
+      
+      window.dailySalesChart = new Chart(dailySalesCtx, {
+        type: 'bar',
+        data: {
+          labels: dailyLabels.reverse(), // Reverse to show chronological order
+          datasets: [{
+            label: 'Daily Sales (₱)',
+            data: dailyValues.reverse(),
+            backgroundColor: '#d9dbc9',
+            borderColor: '#333333',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value;
+                }
+              }
+            }
+          }
         }
-    </style>
+      });
+      
+      // Product sales chart
+      const productData = groupOrdersByProduct(filteredOrders);
+      const productLabels = productData.map(product => product.product);
+      const productValues = productData.map(product => product.totalSales);
+      
+      const productSalesCtx = document.getElementById('productSalesChart').getContext('2d');
+      if (window.productSalesChart) {
+        window.productSalesChart.destroy();
+      }
+      
+      window.productSalesChart = new Chart(productSalesCtx, {
+        type: 'pie',
+        data: {
+          labels: productLabels,
+          datasets: [{
+            data: productValues,
+            backgroundColor: [
+              '#d9dbc9', '#f1ebe5', '#f9f6f0', '#c7c9b8', '#e0d8d0',
+              '#e8e3dc', '#b6b8a8', '#d2cac0', '#dbd5cc', '#a5a798'
+            ],
+            borderColor: '#333333',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / productValues.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                  return `₱${value.toLocaleString()} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Filter orders by date range
+    function filterByDateRange(start, end) {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      endDate.setHours(23, 59, 59, 999); // Include the entire end day
+      
+      filteredOrders = allCompletedOrders.filter(order => {
+        const orderDate = new Date(order.date);
+        return orderDate >= startDate && orderDate <= endDate;
+      });
+      
+      currentDateRange.start = startDate;
+      currentDateRange.end = endDate;
+      
+      updateSummary();
+      renderDailySalesTable();
+      renderProductSalesTable();
+      renderCharts();
+    }
+    
+    // Show day details modal
+    function showDayDetailsModal(date) {
+      const dayOrders = filteredOrders.filter(order => order.date.split('T')[0] === date);
+      const groupedByProduct = groupOrdersByProduct(dayOrders);
+      
+      const modalContent = document.getElementById('dayDetailsModalContent');
+      modalContent.innerHTML = `
+        <h3 class="text-xl font-semibold mb-4">Sales Details for ${formatDate(date)}</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="border-b-2 border-black">
+                <th class="table-header py-3 px-4 text-left">Product</th>
+                <th class="table-header py-3 px-4 text-center">Quantity</th>
+                <th class="table-header py-3 px-4 text-right">Total Sales</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedByProduct.map(product => `
+                <tr class="border-b border-gray-300">
+                  <td class="table-data py-3 px-4">${product.product}</td>
+                  <td class="table-data py-3 px-4 text-center">${product.quantity}</td>
+                  <td class="table-data py-3 px-4 text-right">₱${product.totalSales.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-black font-bold">
+                <td class="table-data py-3 px-4">Total</td>
+                <td class="table-data py-3 px-4 text-center">${groupedByProduct.reduce((sum, product) => sum + product.quantity, 0)}</td>
+                <td class="table-data py-3 px-4 text-right">₱${groupedByProduct.reduce((sum, product) => sum + product.totalSales, 0).toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('dayDetailsModal').classList.remove('hidden');
+    }
+    
+    // Export reports to CSV
+    function exportToCSV(type) {
+      let data, filename;
+      
+      if (type === 'daily') {
+        const groupedByDate = groupOrdersByDate(filteredOrders);
+        data = [
+          ['Date', 'Total Sales'],
+          ...groupedByDate.map(day => [formatDate(day.date), day.totalSales])
+        ];
+        filename = 'daily_sales_report.csv';
+      } else if (type === 'product') {
+        const groupedByProduct = groupOrdersByProduct(filteredOrders);
+        data = [
+          ['Product', 'Quantity', 'Total Sales'],
+          ...groupedByProduct.map(product => [product.product, product.quantity, product.totalSales])
+        ];
+        filename = 'product_sales_report.csv';
+      } else {
+        return;
+      }
+      
+      // Convert data to CSV format
+      const csvContent = data.map(row => row.join(',')).join('\n');
+      
+      // Create a download link and trigger the download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // Fetch completed orders from backend
+    async function fetchCompletedOrders() {
+      try {
+        // In a real application, you would fetch from your API
+        // const response = await fetch('http://localhost:5000/api/orders?status=Completed');
+        // if (!response.ok) throw new Error("Network response was not ok");
+        // allCompletedOrders = await response.json();
+        
+        // For demo purposes, we'll use the sample data
+        allCompletedOrders = sampleOrders.map(order => ({
+          ...order,
+          status: 'Completed'
+        }));
+        
+        // Initially, apply the default date range filter
+        filterByDateRange(currentDateRange.start, currentDateRange.end);
+      } catch (err) {
+        console.error("Error fetching completed orders:", err);
+        // Show error message to user
+        document.getElementById('errorAlert').classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('errorAlert').classList.add('hidden');
+        }, 5000);
+      }
+    }
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch and display completed orders
+      fetchCompletedOrders();
+      
+      // Admin dropdown functionality
+      const adminDropdownBtn = document.getElementById('adminDropdownBtn');
+      const adminDropdownMenu = document.getElementById('adminDropdownMenu');
+      
+      adminDropdownBtn.addEventListener('click', function() {
+        adminDropdownMenu.classList.toggle('hidden');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!adminDropdownBtn.contains(event.target) && !adminDropdownMenu.contains(event.target)) {
+          adminDropdownMenu.classList.add('hidden');
+        }
+      });
+      
+      // Date range filter button
+      document.getElementById('dateRangeBtn').addEventListener('click', function() {
+        document.getElementById('dateRangeModal').classList.remove('hidden');
+        
+        // Set the current date range in the form
+        document.getElementById('startDate').value = currentDateRange.start.toISOString().split('T')[0];
+        document.getElementById('endDate').value = currentDateRange.end.toISOString().split('T')[0];
+      });
+      
+      // Apply date range filter
+      document.getElementById('applyDateRangeBtn').addEventListener('click', function() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        if (startDate && endDate) {
+          filterByDateRange(startDate, endDate);
+          document.getElementById('dateRangeModal').classList.add('hidden');
+        }
+      });
+      
+      // Cancel date range filter
+      document.getElementById('cancelDateRangeBtn').addEventListener('click', function() {
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      // Quick date range filters
+      document.getElementById('todayBtn').addEventListener('click', function() {
+        const today = new Date();
+        filterByDateRange(today, today);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      document.getElementById('yesterdayBtn').addEventListener('click', function() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        filterByDateRange(yesterday, yesterday);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      document.getElementById('last7DaysBtn').addEventListener('click', function() {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(start.getDate() - 6);
+        filterByDateRange(start, end);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      document.getElementById('last30DaysBtn').addEventListener('click', function() {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(start.getDate() - 29);
+        filterByDateRange(start, end);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      document.getElementById('thisMonthBtn').addEventListener('click', function() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        filterByDateRange(start, end);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      document.getElementById('lastMonthBtn').addEventListener('click', function() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 0);
+        filterByDateRange(start, end);
+        document.getElementById('dateRangeModal').classList.add('hidden');
+      });
+      
+      // Export buttons
+      document.getElementById('exportDailyBtn').addEventListener('click', function() {
+        exportToCSV('daily');
+      });
+      
+      document.getElementById('exportProductBtn').addEventListener('click', function() {
+        exportToCSV('product');
+      });
+      
+      // View day details buttons (using event delegation)
+      document.getElementById('dailySalesTableBody').addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-details-btn')) {
+          const date = e.target.getAttribute('data-date');
+          showDayDetailsModal(date);
+        }
+      });
+      
+      // Close day details modal
+      document.getElementById('closeDayDetailsBtn').addEventListener('click', function() {
+        document.getElementById('dayDetailsModal').classList.add('hidden');
+      });
+      
+      // Close modal when clicking outside
+      document.getElementById('dayDetailsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.add('hidden');
+        }
+      });
+      
+      // Print report button
+      document.getElementById('printReportBtn').addEventListener('click', function() {
+        window.print();
+      });
+    });
+  </script>
 </head>
-<body>
-    <div class="container">
-        <h2>Sales Reports</h2>
-        <table>
-            <tr>
-                <th>Date</th>
-                <th>Total Sales</th>
-            </tr>
-            <tr>
-                <td>March 28, 2025</td>
-                <td>₱5,000</td>
-            </tr>
-        </table>
+<body class="min-h-screen bg-[#d9dbc9] p-6 flex flex-col">
+  <!-- Admin Dropdown - Top Right -->
+  <div class="self-end mb-6">
+    <div class="relative">
+      <button 
+        id="adminDropdownBtn"
+        class="px-4 py-2 border border-gray-400 rounded flex items-center"
+      >
+        Admin <span class="ml-2">▼</span>
+      </button>
+      <div 
+        id="adminDropdownMenu"
+        class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden"
+      >
+        <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+          Logout
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div id="errorAlert" class="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 hidden">
+    <strong class="font-bold">Error!</strong>
+    <span class="block sm:inline"> Failed to load report data.</span>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container mx-auto container-bg p-8 rounded-lg shadow-md">
+    <!-- Back to Dashboard Button -->
+    <div class="mb-6">
+      <a href="admin_dashboard.html" class="inline-block">
+        <button class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </a>
+    </div>
+    
+    <!-- Page Title -->
+    <h1 class="page-title text-4xl md:text-5xl text-center mb-8">
+      Sales Reports
+    </h1>
+    
+    <!-- Date Range and Actions Row -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      <div class="flex items-center">
+        <span class="mr-2 font-bold">Date Range:</span>
+        <span id="dateRangeDisplay" class="mr-4">Loading...</span>
+        <button 
+          id="dateRangeBtn"
+          class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold"
+        >
+          Change Date Range
+        </button>
+      </div>
+      
+      <div class="flex gap-4">
+        <button 
+          id="printReportBtn"
+          class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Print Report
+        </button>
+      </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="card-bg p-6 rounded-lg shadow-sm">
+        <h3 class="section-title text-lg mb-2">Total Sales</h3>
+        <p id="totalSalesValue" class="text-3xl font-bold">₱0</p>
+      </div>
+      
+      <div class="card-bg p-6 rounded-lg shadow-sm">
+        <h3 class="section-title text-lg mb-2">Total Orders</h3>
+        <p id="totalOrdersValue" class="text-3xl font-bold">0</p>
+      </div>
+      
+      <div class="card-bg p-6 rounded-lg shadow-sm">
+        <h3 class="section-title text-lg mb-2">Average Order Value</h3>
+        <p id="averageOrderValue" class="text-3xl font-bold">₱0</p>
+      </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="mb-8">
+      <h2 class="section-title text-2xl mb-4">Sales Trends</h2>
+      <div class="card-bg p-6 rounded-lg shadow-sm">
+        <canvas id="dailySalesChart" height="100"></canvas>
+      </div>
+    </div>
+    
+    <!-- Daily Sales Table -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="section-title text-2xl">Daily Sales</h2>
+        <button 
+          id="exportDailyBtn"
+          class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold text-sm"
+        >
+          Export to CSV
+        </button>
+      </div>
+      
+      <div class="card-bg p-4 rounded-lg shadow-sm overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="border-b-2 border-black">
+              <th class="table-header py-3 px-4 text-left">Date</th>
+              <th class="table-header py-3 px-4 text-right">Total Sales</th>
+              <th class="table-header py-3 px-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dailySalesTableBody">
+            <!-- Dynamic rows will be inserted here -->
+            <tr>
+              <td colspan="3" class="py-4 text-center text-gray-500">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Product Sales Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Product Sales Chart -->
+      <div>
+        <h2 class="section-title text-2xl mb-4">Product Sales Distribution</h2>
+        <div class="card-bg p-6 rounded-lg shadow-sm h-full">
+          <canvas id="productSalesChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Product Sales Table -->
+      <div>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="section-title text-2xl">Product Sales</h2>
+          <button 
+            id="exportProductBtn"
+            class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold text-sm"
+          >
+            Export to CSV
+          </button>
+        </div>
+        
+        <div class="card-bg p-4 rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="border-b-2 border-black">
+                <th class="table-header py-3 px-4 text-left">Product</th>
+                <th class="table-header py-3 px-4 text-center">Quantity</th>
+                <th class="table-header py-3 px-4 text-right">Total Sales</th>
+              </tr>
+            </thead>
+            <tbody id="productSalesTableBody">
+              <!-- Dynamic rows will be inserted here -->
+              <tr>
+                <td colspan="3" class="py-4 text-center text-gray-500">Loading data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Date Range Modal -->
+  <div id="dateRangeModal" class="modal-backdrop hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+      <h3 class="page-title text-xl font-semibold mb-4">Select Date Range</h3>
+      
+      <!-- Quick Date Range Buttons -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <button id="todayBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          Today
+        </button>
+        <button id="yesterdayBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          Yesterday
+        </button>
+        <button id="last7DaysBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          Last 7 Days
+        </button>
+        <button id="last30DaysBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          Last 30 Days
+        </button>
+        <button id="thisMonthBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          This Month
+        </button>
+        <button id="lastMonthBtn" class="nav-button px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold text-sm">
+          Last Month
+        </button>
+      </div>
+      
+      <!-- Custom Date Range -->
+      <div class="mb-4">
+        <label for="startDate" class="block mb-1 font-bold">Start Date</label>
+        <input 
+          type="date" 
+          id="startDate" 
+          class="w-full px-3 py-2 border border-gray-300 rounded"
+          required
+        >
+      </div>
+      
+      <div class="mb-6">
+        <label for="endDate" class="block mb-1 font-bold">End Date</label>
+        <input 
+          type="date" 
+          id="endDate" 
+          class="w-full px-3 py-2 border border-gray-300 rounded"
+          required
+        >
+      </div>
+      
+      <!-- Modal Buttons -->
+      <div class="flex justify-end gap-3">
+        <button 
+          id="cancelDateRangeBtn"
+          class="nav-button px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors font-bold"
+        >
+          Cancel
+        </button>
+        <button 
+          id="applyDateRangeBtn"
+          class="nav-button px-4 py-2 border-2 border-black bg-[#d9dbc9] hover:bg-gray-200 transition-colors font-bold"
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Day Details Modal -->
+  <div id="dayDetailsModal" class="modal-backdrop hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6">
+      <div class="flex justify-between items-center mb-4">
+        <div id="dayDetailsModalContent">
+          <!-- Content will be dynamically inserted here -->
+        </div>
+        <button 
+          id="closeDayDetailsBtn"
+          class="text-gray-500 hover:text-gray-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

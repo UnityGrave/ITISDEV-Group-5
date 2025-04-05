@@ -96,6 +96,7 @@
             width: 500px;
             box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1);
             text-align: center;
+            margin-top: 60px;
         }
         .title {
             font-size: 24px;
@@ -105,6 +106,7 @@
         .info {
             font-size: 16px;
             margin-bottom: 10px;
+            text-align: left;
         }
         .file-preview {
             margin-top: 15px;
@@ -116,6 +118,75 @@
         .contact {
             font-size: 14px;
             margin-top: 20px;
+        }
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #4a4a4a;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .edit-btn {
+            background-color: #7F9472;
+            color: white;
+        }
+        .confirm-btn {
+            background-color: #4a4a4a;
+            color: white;
+        }
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .success-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            background-color: #4a4a4a;
+            color: white;
+        }
+        .success-btn:hover {
+            opacity: 0.9;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -143,19 +214,113 @@
         </div>
     </nav>
 
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        Order submitted successfully!
+    </div>
+
     <!-- Main content -->
     <div class="container">
         <div class="title">Order Confirmation</div>
-        <p class="info"><strong>Order Summary:</strong> Printing Order - 20 pages, B/W</p>
-        <p class="info"><strong>Deadline:</strong> April 5, 2025, 3:00 PM</p>
-        <div class="file-preview">
-            <strong>Uploaded Files:</strong>
-            <ul>
-                <li>document1.pdf</li>
-                <li>image2.png</li>
-            </ul>
+        <div id="successMessage" class="success-message">
+            <p>Would you like to place another order?</p>
+            <div class="success-buttons">
+                <button class="success-btn" onclick="window.location.href='order_form.html'">Yes, Order Again</button>
+                <button class="success-btn" onclick="window.location.href='dashboard.html'">No, Go to Dashboard</button>
+            </div>
         </div>
-        <p class="contact"><strong>Contact Us:</strong><br>Room 105, Bro. Connon Hall<br>Email: scoop@dlsu.edu.ph</p>
+        <div id="orderDetails">
+            <!-- Order details will be populated by JavaScript -->
+        </div>
+        <div id="button-group" class="button-group">
+            <button class="action-btn edit-btn" onclick="window.location.href='order_form.html'">Edit Order</button>
+            <button class="action-btn confirm-btn" onclick="submitOrder()">Confirm Order</button>
+        </div>
     </div>
+
+    <script>
+        // Load and display order details
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = JSON.parse(localStorage.getItem('orderData'));
+            if (!orderData) {
+                window.location.href = 'order_form.html';
+                return;
+            }
+
+            const orderDetails = document.getElementById('orderDetails');
+            const dueDate = new Date(orderData.due_date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            orderDetails.innerHTML = `
+                <p class="info"><strong>Service:</strong> ${orderData.product}</p>
+                <p class="info"><strong>Quantity:</strong> ${orderData.quantity}</p>
+                <p class="info"><strong>Paper Size:</strong> ${orderData.size}</p>
+                <p class="info"><strong>Color:</strong> ${orderData.color === 'bnw' ? 'Black and White' : 'Colored'}</p>
+                <p class="info"><strong>Due Date:</strong> ${dueDate}</p>
+                <p class="info"><strong>Contact Name:</strong> ${orderData.name}</p>
+                <p class="info"><strong>Contact Number:</strong> ${orderData.contact}</p>
+                <p class="info"><strong>Email:</strong> ${orderData.email}</p>
+                ${orderData.notes ? `<p class="info"><strong>Additional Notes:</strong> ${orderData.notes}</p>` : ''}
+                ${orderData.fileName ? `
+                    <div class="file-preview">
+                        <strong>Uploaded File:</strong>
+                        <ul>
+                            <li>${orderData.fileName}</li>
+                        </ul>
+                    </div>
+                ` : ''}
+                <div class="price">Total Price: P${orderData.totalPrice}</div>
+            `;
+        });
+
+        async function submitOrder() {
+            const orderData = JSON.parse(localStorage.getItem('orderData'));
+            const formData = new FormData();
+            
+            // Add all order data to FormData
+            for (const key in orderData) {
+                if (key !== 'fileName') {
+                    formData.append(key, orderData[key]);
+                }
+            }
+
+            try {
+                const response = await fetch("http://localhost:5000/api/orders/submit", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show toast notification
+                    const toast = document.getElementById('toast');
+                    toast.style.display = 'block';
+                    
+                    // Hide order details and action buttons
+                    document.getElementById('orderDetails').style.display = 'none';
+                    document.getElementById('button-group').style.display = 'none';
+                    
+                    // Show success message with options
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Remove order data from localStorage
+                    localStorage.removeItem('orderData');
+                    
+                    // Hide toast after 3 seconds
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert(result.msg || "Failed to submit order. Please try again.");
+                }
+            } catch (err) {
+                alert("Failed to submit order. Please try again.");
+                console.error(err);
+            }
+        }
+    </script>
 </body>
 </html>

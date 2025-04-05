@@ -104,13 +104,19 @@
         <div class="right-content">
             <h2>Login</h2>
             <input type="text" id="email" placeholder="Username/Email" class="input-field">
-            <input type="password" id="password" placeholder="Password" class="input-field">
+            <input type="password" id="password" placeholder="Password" class="input-field" onkeypress="handleKeyPress(event)">
             <button class="btn" onclick="login()">Login</button>
             <p class="signup-link">Don't have an account? <a href="signup.html">Sign up</a></p>
         </div>
     </div>
 
     <script>
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        }
+
         async function login() {
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
