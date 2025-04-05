@@ -109,6 +109,19 @@
       end: new Date()
     };
     
+    // Global variables for chart configuration
+    let currentTimeRange = 'last30';
+    let currentGroupBy = 'day';
+    let salesBarChart = null;
+    let salesLineChart = null;
+    
+    // Global variables for product chart
+    let currentProductTimeRange = 'last30';
+    let currentProductGroupBy = 'day';
+    let productSalesChart = null;
+    let currentProductPage = 1;
+    const productsPerPage = 5;
+    
     // Format date for display
     function formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -422,6 +435,294 @@
       }
     }
     
+    // Function to group data by time period
+    function groupDataByPeriod(orders, groupBy) {
+      const grouped = {};
+      
+      orders.forEach(order => {
+        // Only include completed orders
+        if (order.status === 'Completed') {
+          const date = new Date(order.date);
+          let key;
+          
+          switch(groupBy) {
+            case 'day':
+              key = date.toISOString().split('T')[0];
+              break;
+            case 'week':
+              const weekStart = new Date(date);
+              weekStart.setDate(date.getDate() - date.getDay());
+              key = weekStart.toISOString().split('T')[0];
+              break;
+            case 'month':
+              key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+              break;
+          }
+          
+          if (!grouped[key]) {
+            grouped[key] = 0;
+          }
+          grouped[key] += order.totalSales;
+        }
+      });
+      
+      return grouped;
+    }
+    
+    // Function to get date range based on selection
+    function getDateRange(timeRange) {
+      const end = new Date();
+      const start = new Date();
+      
+      switch(timeRange) {
+        case 'today':
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'yesterday':
+          start.setDate(start.getDate() - 1);
+          start.setHours(0, 0, 0, 0);
+          end.setDate(end.getDate() - 1);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case 'last7':
+          start.setDate(start.getDate() - 6);
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'last14':
+          start.setDate(start.getDate() - 13);
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'last30':
+          start.setDate(start.getDate() - 29);
+          start.setHours(0, 0, 0, 0);
+          break;
+      }
+      
+      return { start, end };
+    }
+    
+    // Function to format date labels based on grouping
+    function formatDateLabel(dateStr, groupBy) {
+      const date = new Date(dateStr);
+      switch(groupBy) {
+        case 'day':
+          return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        case 'week':
+          const weekEnd = new Date(date);
+          weekEnd.setDate(date.getDate() + 6);
+          return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+        case 'month':
+          return date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+      }
+    }
+    
+    // Function to update charts
+    function updateCharts() {
+      const { start, end } = getDateRange(currentTimeRange);
+      const filteredData = filteredOrders.filter(order => {
+        const orderDate = new Date(order.date);
+        return orderDate >= start && orderDate <= end && order.status === 'Completed';
+      });
+      
+      const groupedData = groupDataByPeriod(filteredData, currentGroupBy);
+      const labels = Object.keys(groupedData).sort().map(date => formatDateLabel(date, currentGroupBy));
+      const values = Object.values(groupedData);
+      
+      // Update Bar Chart
+      if (salesBarChart) {
+        salesBarChart.destroy();
+      }
+      
+      const barCtx = document.getElementById('salesBarChart').getContext('2d');
+      salesBarChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Sales (₱) - Completed Orders',
+            data: values,
+            backgroundColor: '#d9dbc9',
+            borderColor: '#333333',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return '₱' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Update Line Chart
+      if (salesLineChart) {
+        salesLineChart.destroy();
+      }
+      
+      const lineCtx = document.getElementById('salesLineChart').getContext('2d');
+      salesLineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Sales (₱) - Completed Orders',
+            data: values,
+            borderColor: '#333333',
+            backgroundColor: 'rgba(217, 219, 201, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return '₱' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Function to shorten product names
+    function shortenProductName(name) {
+      const shortNames = {
+        "Regular Printing": "Regular Print",
+        "One-sided Laminated ID/Nametag (3R)": "1-Sided ID",
+        "Back-to-back Laminated ID/Nametag (3R)": "2-Sided ID",
+        "1/4 size Lamination": "1/4 Lam",
+        "1/2 size Lamination": "1/2 Lam",
+        "1 whole size Lamination": "Full Lam",
+        "Certificate Printing (Letter)": "Cert Print",
+        "Matte Sticker Paper Printing (A4)": "Matte Sticker",
+        "Glossy Sticker Paper Printing (A4)": "Glossy Sticker",
+        "Matte Board Printing (A4)": "Matte Board",
+        "Perforated Ticket Printing": "Ticket Print",
+        "Poster Printing (A4)": "Poster Print"
+      };
+      return shortNames[name] || name;
+    }
+    
+    // Function to get product sales data
+    function getProductSalesData(orders) {
+      const productSales = {};
+      
+      orders.forEach(order => {
+        // Only include completed orders
+        if (order.status === 'Completed') {
+          if (!productSales[order.product]) {
+            productSales[order.product] = 0;
+          }
+          productSales[order.product] += order.totalSales;
+        }
+      });
+      
+      return Object.entries(productSales)
+        .sort((a, b) => b[1] - a[1])
+        .map(([product, sales]) => ({
+          product: shortenProductName(product),
+          sales: sales
+        }));
+    }
+    
+    // Function to update product chart
+    function updateProductChart() {
+      const { start, end } = getDateRange(currentProductTimeRange);
+      const filteredData = filteredOrders.filter(order => {
+        const orderDate = new Date(order.date);
+        return orderDate >= start && orderDate <= end && order.status === 'Completed';
+      });
+      
+      const productData = getProductSalesData(filteredData);
+      const totalPages = Math.ceil(productData.length / productsPerPage);
+      
+      // Update pagination info
+      document.getElementById('totalProducts').textContent = productData.length;
+      document.getElementById('productRangeStart').textContent = ((currentProductPage - 1) * productsPerPage) + 1;
+      document.getElementById('productRangeEnd').textContent = Math.min(currentProductPage * productsPerPage, productData.length);
+      
+      // Update pagination buttons
+      document.getElementById('prevProductPage').disabled = currentProductPage === 1;
+      document.getElementById('nextProductPage').disabled = currentProductPage === totalPages;
+      
+      // Get current page data
+      const startIdx = (currentProductPage - 1) * productsPerPage;
+      const endIdx = startIdx + productsPerPage;
+      const pageData = productData.slice(startIdx, endIdx);
+      
+      // Update chart
+      if (productSalesChart) {
+        productSalesChart.destroy();
+      }
+      
+      const ctx = document.getElementById('productSalesChart').getContext('2d');
+      productSalesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: pageData.map(item => item.product),
+          datasets: [{
+            label: 'Total Sales (₱) - Completed Orders',
+            data: pageData.map(item => item.sales),
+            backgroundColor: '#d9dbc9',
+            borderColor: '#333333',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return '₱' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
     // Initialize the page
     document.addEventListener('DOMContentLoaded', () => {
       // Fetch and display completed orders
@@ -546,6 +847,107 @@
       document.getElementById('printReportBtn').addEventListener('click', function() {
         window.print();
       });
+      
+      // Time Range dropdown
+      document.getElementById('timeRangeBtn').addEventListener('click', function() {
+        document.getElementById('timeRangeMenu').classList.toggle('hidden');
+      });
+      
+      document.querySelectorAll('#timeRangeMenu button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentTimeRange = this.getAttribute('data-range');
+          updateCharts();
+          document.getElementById('timeRangeMenu').classList.add('hidden');
+        });
+      });
+      
+      // Group By dropdown
+      document.getElementById('groupByBtn').addEventListener('click', function() {
+        document.getElementById('groupByMenu').classList.toggle('hidden');
+      });
+      
+      document.querySelectorAll('#groupByMenu button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentGroupBy = this.getAttribute('data-group');
+          updateCharts();
+          document.getElementById('groupByMenu').classList.add('hidden');
+        });
+      });
+      
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('#timeRangeBtn') && !event.target.closest('#timeRangeMenu')) {
+          document.getElementById('timeRangeMenu').classList.add('hidden');
+        }
+        if (!event.target.closest('#groupByBtn') && !event.target.closest('#groupByMenu')) {
+          document.getElementById('groupByMenu').classList.add('hidden');
+        }
+      });
+      
+      // Product Time Range dropdown
+      document.getElementById('productTimeRangeBtn').addEventListener('click', function() {
+        document.getElementById('productTimeRangeMenu').classList.toggle('hidden');
+      });
+      
+      document.querySelectorAll('#productTimeRangeMenu button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentProductTimeRange = this.getAttribute('data-range');
+          currentProductPage = 1; // Reset to first page
+          updateProductChart();
+          document.getElementById('productTimeRangeMenu').classList.add('hidden');
+        });
+      });
+      
+      // Product Group By dropdown
+      document.getElementById('productGroupByBtn').addEventListener('click', function() {
+        document.getElementById('productGroupByMenu').classList.toggle('hidden');
+      });
+      
+      document.querySelectorAll('#productGroupByMenu button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentProductGroupBy = this.getAttribute('data-group');
+          currentProductPage = 1; // Reset to first page
+          updateProductChart();
+          document.getElementById('productGroupByMenu').classList.add('hidden');
+        });
+      });
+      
+      // Product pagination buttons
+      document.getElementById('prevProductPage').addEventListener('click', function() {
+        if (currentProductPage > 1) {
+          currentProductPage--;
+          updateProductChart();
+        }
+      });
+      
+      document.getElementById('nextProductPage').addEventListener('click', function() {
+        const { start, end } = getDateRange(currentProductTimeRange);
+        const filteredData = filteredOrders.filter(order => {
+          const orderDate = new Date(order.date);
+          return orderDate >= start && orderDate <= end && order.status === 'Completed';
+        });
+        const productData = getProductSalesData(filteredData);
+        const totalPages = Math.ceil(productData.length / productsPerPage);
+        
+        if (currentProductPage < totalPages) {
+          currentProductPage++;
+          updateProductChart();
+        }
+      });
+      
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('#productTimeRangeBtn') && !event.target.closest('#productTimeRangeMenu')) {
+          document.getElementById('productTimeRangeMenu').classList.add('hidden');
+        }
+        if (!event.target.closest('#productGroupByBtn') && !event.target.closest('#productGroupByMenu')) {
+          document.getElementById('productGroupByMenu').classList.add('hidden');
+        }
+      });
+      
+      // Initial chart render
+      updateCharts();
+      updateProductChart();
     });
   </script>
 </head>
@@ -641,9 +1043,46 @@
     
     <!-- Charts Section -->
     <div class="mb-8">
-      <h2 class="section-title text-2xl mb-4">Sales Trends</h2>
-      <div class="card-bg p-6 rounded-lg shadow-sm">
-        <canvas id="dailySalesChart" height="100"></canvas>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="section-title text-2xl">Sales Trends</h2>
+        <div class="flex gap-4">
+          <div class="relative">
+            <button id="timeRangeBtn" class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+              Time Range <span class="ml-2">▼</span>
+            </button>
+            <div id="timeRangeMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="today">Today</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="yesterday">Yesterday</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last7">Last 7 Days</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last14">Last 14 Days</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last30">Last 30 Days</button>
+            </div>
+          </div>
+          <div class="relative">
+            <button id="groupByBtn" class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+              Group By <span class="ml-2">▼</span>
+            </button>
+            <div id="groupByMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="day">Day</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="week">Week</button>
+              <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="month">Month</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Bar Chart -->
+        <div class="card-bg p-6 rounded-lg shadow-sm">
+          <h3 class="section-title text-lg mb-4">Sales by Time Period</h3>
+          <canvas id="salesBarChart" height="300"></canvas>
+        </div>
+        
+        <!-- Line Chart -->
+        <div class="card-bg p-6 rounded-lg shadow-sm">
+          <h3 class="section-title text-lg mb-4">Sales by Time Period (Line Chart)</h3>
+          <canvas id="salesLineChart" height="300"></canvas>
+        </div>
       </div>
     </div>
     
@@ -684,7 +1123,45 @@
       <div>
         <h2 class="section-title text-2xl mb-4">Product Sales Distribution</h2>
         <div class="card-bg p-6 rounded-lg shadow-sm h-full">
-          <canvas id="productSalesChart"></canvas>
+          <div class="flex justify-end gap-4 mb-4">
+            <div class="relative">
+              <button id="productTimeRangeBtn" class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+                Time Range <span class="ml-2">▼</span>
+              </button>
+              <div id="productTimeRangeMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="today">Today</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="yesterday">Yesterday</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last7">Last 7 Days</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last14">Last 14 Days</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-range="last30">Last 30 Days</button>
+              </div>
+            </div>
+            <div class="relative">
+              <button id="productGroupByBtn" class="nav-button px-4 py-2 border-2 border-black card-bg hover:bg-gray-200 transition-colors font-bold flex items-center">
+                Group By <span class="ml-2">▼</span>
+              </button>
+              <div id="productGroupByMenu" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-10 hidden">
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="day">Day</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="week">Week</button>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-100" data-group="month">Month</button>
+              </div>
+            </div>
+          </div>
+          <canvas id="productSalesChart" height="300"></canvas>
+          <!-- Pagination Controls -->
+          <div class="flex justify-between items-center mt-6">
+            <div class="text-sm table-data">
+              Showing products <span id="productRangeStart">1</span>-<span id="productRangeEnd">5</span> of <span id="totalProducts">0</span>
+            </div>
+            <div class="flex gap-2">
+              <button id="prevProductPage" class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm disabled:opacity-50" disabled>
+                Previous
+              </button>
+              <button id="nextProductPage" class="nav-button px-3 py-1 border border-black rounded hover:bg-gray-200 transition-colors font-bold text-sm disabled:opacity-50" disabled>
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       
