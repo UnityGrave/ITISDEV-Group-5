@@ -8,15 +8,20 @@ const OrderSchema = new mongoose.Schema({
   email: { type: String, required: true },
   due_date: { type: Date, required: true },
   notes: { type: String },
+  fileBase64: { type: String },
 
-  // Store order JSON file (existing functionality)
-  filePath: { type: String }, 
+  // Existing file fields
+  filePath: { type: String },
+  uploadedFilePath: { type: String },
+  fileOriginalName: { type: String },
+  fileMimeType: { type: String },
+  uploadedAt: { type: Date, default: Date.now },
 
-  // New: Store uploaded file details
-  uploadedFilePath: { type: String }, // Path in /uploads/
-  fileOriginalName: { type: String }, // Original name of uploaded file
-  fileMimeType: { type: String }, // File type (e.g., image/jpeg, application/pdf)
-  uploadedAt: { type: Date, default: Date.now }, // Timestamp
+  // ➕ New fields
+  orderId: { type: String, unique: true }, // like #001, #002
+  totalPrice: { type: Number, required: true },
+  dateOrdered: { type: Date, default: Date.now },
+  status: { type: String, enum: ["processing", "completed", "cancelled"], default: "processing" },
 });
 
 module.exports = mongoose.model("Order", OrderSchema);
