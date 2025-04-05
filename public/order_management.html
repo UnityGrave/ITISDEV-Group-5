@@ -383,13 +383,18 @@
       document.getElementById('editOrderForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         const formData = new FormData(this);
+        const quantity = parseInt(formData.get('quantity'));
+        const product = formData.get('product');
+        const totalPrice = getTotalPrice(product, quantity);
+        
         const orderData = {
           name: formData.get('customer'),
-          product: formData.get('product'),
-          quantity: parseInt(formData.get('quantity')),
+          product: product,
+          quantity: quantity,
           dateOrdered: formData.get('dateOrdered'),
           due_date: formData.get('dueDate'),
-          status: formData.get('status')
+          status: formData.get('status'),
+          totalPrice: totalPrice
         };
 
         try {
@@ -417,6 +422,30 @@
           }, 3000);
         } catch (err) {
           console.error("Error updating order:", err);
+        }
+      });
+
+      // Add event listener for quantity changes in the edit form
+      document.getElementById('editQuantity').addEventListener('change', function() {
+        const quantity = parseInt(this.value);
+        const product = document.getElementById('editProduct').value;
+        const totalPrice = getTotalPrice(product, quantity);
+        // Update the total price display in the form if you have one
+        const totalPriceDisplay = document.getElementById('editTotalPrice');
+        if (totalPriceDisplay) {
+          totalPriceDisplay.textContent = `₱${totalPrice}`;
+        }
+      });
+
+      // Add event listener for product changes in the edit form
+      document.getElementById('editProduct').addEventListener('change', function() {
+        const product = this.value;
+        const quantity = parseInt(document.getElementById('editQuantity').value);
+        const totalPrice = getTotalPrice(product, quantity);
+        // Update the total price display in the form if you have one
+        const totalPriceDisplay = document.getElementById('editTotalPrice');
+        if (totalPriceDisplay) {
+          totalPriceDisplay.textContent = `₱${totalPrice}`;
         }
       });
 
