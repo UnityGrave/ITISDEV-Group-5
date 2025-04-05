@@ -5,69 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLSU SCoOp - Dashboard</title>
 
-        <!-- Import Noto Sans from Google Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Import fonts from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
 
-        <!-- Link to External CSS -->
-        <link rel="stylesheet" href="styles.css">
-        <style>
-            body {
-                font-family: 'Noto Sans', sans-serif;
-                background-color: #d9dbc9;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-            }
-            .container {
-                display: flex;
-                align-items: center;
-                background: transparent;
-                padding: 50px;
-                border-radius: 12px;
-                max-width: 900px;
-            }
-            .left-content {
-                flex: 1;
-                text-align: left;
-                padding-right: 150px;
-            }
-            .logo {
-                width: 310px;
-                display: block;
-                margin-bottom: 12px;
-            }
-            .right-content {
-                flex: 1;
-                background: #f9f6f0;
-                padding: 15px;
-                border-radius: 0px;
-                text-align: center;
-            }
-            .btn {
-                display: inline-block;
-                width: 100%;
-                padding: 15px;
-                margin: 15px 0;
-                border: 1.5px solid black;
-                background: transparent;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: 400;
-            }
-            .btn:hover {
-                background: #ddd;
-            }
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Quattrocento', serif;
+            background-color: #d9dbc9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            background: transparent;
+            padding: 50px;
+            border-radius: 12px;
+            max-width: 900px;
+        }
+        .left-content {
+            flex: 1;
+            text-align: left;
+            padding-right: 150px;
+        }
+        .logo {
+            width: 310px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .right-content {
+            flex: 1;
+            background: #f9f6f0;
+            padding: 15px;
+            border-radius: 0px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1.5px solid black;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 700;
+        }
+        .btn:hover {
+            background: #ddd;
+        }
     
-            .info {
-                font-size: 14px;
-                color: black;
-            }
+        .info {
+            font-size: 14px;
+            color: black;
+            font-weight: 700;
+        }
 
-            p{
-                text-align: center;
-            }
+        .info-value {
+            font-weight: 400;
+        }
+
+        p {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        strong {
+            font-weight: 900;
+        }
     </style>
 </head>
 <body>
@@ -76,8 +89,8 @@
             <p><strong>WELCOME!</strong></p>
             <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
             <div class="text">
-                <p><strong>ADDRESS:</strong> RM. 105, BRO. CONNON HALL</p>
-                <p><strong>EMAIL:</strong> SCOOP@DLSU.EDU.PH</p>
+                <p><strong>ADDRESS:</strong><span class="info-value"> RM. 105, BRO. CONNON HALL</span></p>
+                <p><strong>EMAIL:</strong><span class="info-value"> SCOOP@DLSU.EDU.PH</span></p>
             </div>
         </div>
 

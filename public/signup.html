@@ -3,99 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <title>DLSU SCoOp - Sign Up</title>
+
+  <!-- Import Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
+
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
   <style>
     body {
-      font-family: 'Noto Sans', sans-serif;
+      font-family: 'Cormorant Garamond', serif;
       background-color: #d9dbc9;
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .container {
-      width: 400px;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      background: transparent;
+      padding: 50px;
+      border-radius: 12px;
+      max-width: 900px;
+      align-items: center;
+    }
+    .left-content {
+      flex: 1;
+      text-align: left;
+      padding-right: 80px;
+    }
+    .logo {
+      width: 310px;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .info p {
+      font-size: 14px;
+      color: black;
+      font-weight: 600;
+      margin: 5px 0;
+    }
+    .right-content {
+      flex: 1;
+      background: #f9f6f0;
+      padding: 15px;
+      border-radius: 0px;
+      text-align: center;
     }
     h2 {
-      text-align: center;
+      font-family: 'Quattrocento', serif;
+      font-weight: 700;
       margin-bottom: 20px;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
+    .input-field {
+      width: 90%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1.5px solid #ccc;
+      border-radius: 0px;
+      font-size: 14px;
+      background: white;
+      font-family: 'Cormorant Garamond', serif;
     }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid black;
-      border-radius: 5px;
-      font-size: 16px;
+    .btn {
+      display: inline-block;
+      width: 75%;
+      padding: 15px;
+      margin: 15px 0;
+      border: 1.5px solid black;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .btn:hover {
+      background: #ddd;
+    }
+    .login-link {
+      margin-top: 12px;
+      font-size: 14px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+    }
+    .login-link a {
+      color: #006400;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
     }
     .password-container {
       position: relative;
+      width: 90%;
+      margin: 0 auto;
     }
     .toggle-password {
       position: absolute;
-      right: 10px;
+      right: 20px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #4a4a4a;
-      color: white;
-      border: none;
-      font-size: 16px;
-      margin-top: 15px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #333;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Sign Up</h2>
-  <form id="signupForm">
-    <label for="name">Full Name:</label>
-    <input type="text" id="name" name="name" required/>
+  <!-- Left Side: Logo and Text -->
+  <div class="left-content">
+    <img src="scoop logo.png" alt="DLSU SCoOp Logo" class="logo">
+    <p class="info"><strong>ADDRESS:</strong> RM. 105, BRO. CONNON HALL</p>
+    <p class="info"><strong>EMAIL:</strong> SCOOP@DLSU.EDU.PH</p>
+  </div>
 
-    <label for="email">Email Address:</label>
-    <input type="email" id="email" name="email" required/>
+  <!-- Right Side: Sign Up Form -->
+  <div class="right-content">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <input type="text" id="name" name="name" placeholder="Full Name" class="input-field" required>
+      <input type="email" id="email" name="email" placeholder="Email Address" class="input-field" required>
+      
+      <div class="password-container">
+        <input type="password" id="password" name="password" placeholder="Password" class="input-field" required>
+        <span class="toggle-password" id="eye-icon" onclick="togglePassword()">👁️‍🗨️</span>
+      </div>
 
-    <label for="password">Password:</label>
-    <div class="password-container">
-      <input type="password" id="password" name="password" required/>
-      <span class="toggle-password" id="eye-icon" onclick="togglePassword()">👁️‍🗨️</span>
-    </div>
+      <input type="tel" id="phone" name="phone" pattern="[0-9]{10,11}" placeholder="Phone Number (09XXXXXXXXX)" class="input-field" required>
+      
+      <select id="role" name="role" class="input-field" required>
+        <option value="" disabled selected>Select account type</option>
+        <option value="Customer">Customer</option>
+        <option value="Admin">Admin</option>
+      </select>
 
-    <label for="phone">Phone Number:</label>
-    <input type="tel" id="phone" name="phone" pattern="[0-9]{10,11}" required placeholder="09XXXXXXXXX"/>
-
-    <label for="role">Select Account Type:</label>
-    <select id="role" name="role" required>
-      <option value="" disabled selected>Select account type</option>
-      <option value="Customer">Customer</option>
-      <option value="Admin">Admin</option>
-    </select>
-
-    <button type="submit">Create Account</button>
-  </form>
+      <button type="submit" class="btn">Create Account</button>
+    </form>
+    <p class="login-link">Already have an account? <a href="login.html">Login</a></p>
+  </div>
 </div>
 
 <script>
