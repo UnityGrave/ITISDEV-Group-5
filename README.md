@@ -1,6 +1,6 @@
 # DLSU Student Co-Operative (SCoOp) Advanced Order System
 
-A web-based application designed to streamline order processing for the DLSU Student Co-Operative (SCoOp). This system will help manage orders efficiently, reduce manual workload, and provide real-time tracking for both customers and administrators.
+A web-based application designed to streamline order processing for the DLSU Student Co-Operative (SCoOp). This system helps manage orders efficiently, reduce manual workload, and provide real-time tracking for both customers and administrators.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ A web-based application designed to streamline order processing for the DLSU Stu
 
 ## Overview
 
-The SCoOp Advanced Order System is developed to replace the current manual process (using tools like Google Forms and spreadsheets) with a centralized, automated solution. This platform will allow students, organizations, and offices to place orders for services (e.g., printing and tarpaulin production) while providing SCoOp with real-time order tracking and reporting capabilities.
+The SCoOp Advanced Order System is developed to replace the current manual process (using tools like Google Forms and spreadsheets) with a centralized, automated solution. This platform allows students, organizations, and offices to place orders for services (e.g., printing and tarpaulin production) while providing SCoOp with real-time order tracking and reporting capabilities.
 
 ## Background
 
@@ -33,40 +33,48 @@ By integrating this advanced order system, SCoOp aims to improve overall operati
 ### For Users/Orders
 
 - **User Registration & Login:**
-
   - Create an account using email, contact number, and name.
   - Secure login functionality.
 
 - **Order Placement:**
-
   - Fill out an order form specifying service type, quantity, due dates, remarks, and contact details.
+  - Real-time price calculation based on selected services.
 
 - **Product Customization:**
-
   - Customize options for size, paper type, color, print quality, finishes, GSM, and add-ons.
+  - Support for various printing services including:
+    - Regular Printing
+    - Laminated ID/Nametag
+    - Lamination Services
+    - Certificate Printing
+    - Sticker Paper Printing
+    - Matte Board Printing
+    - Perforated Ticket Printing
+    - Poster Printing
 
 - **File Upload:**
-
   - Upload documents or images required for order processing.
+  - File validation and preview.
 
 - **Order Confirmation:**
-
   - Receive an order summary with confirmation details and deadlines.
+  - Email notifications for order status updates.
 
 ### For Admin
 
 - **Dashboard & Order Management:**
-
-  - View all orders with real-time statuses (Received, Processing, Completed).
+  - View all orders with real-time statuses (Pending, Processing, Completed, Cancelled).
   - Edit or update order details as needed.
+  - Filter and search orders by various criteria.
+  - Sort orders by date, status, and other parameters.
 
 - **Customer/User Management:**
-
   - Access order history, contact information, and transaction records for each user.
+  - View customer details and order patterns.
 
 - **Reporting:**
-
   - Generate reports on order volume and revenue to monitor performance.
+  - Export order data for analysis.
 
 ## System Architecture
 
@@ -74,10 +82,13 @@ The system is organized into two main interfaces:
 
 1. **User Interface:**
    - Home, Login, Signup, Order Form, Product Customization, File Upload, and Order Confirmation pages.
+   - Built with HTML, CSS, and JavaScript for the frontend.
+   - Responsive design for mobile and desktop access.
+
 2. **Admin Interface:**
    - Dashboard, Order Management, User Management, and Reports pages.
-
-This separation ensures that both users and administrators have access to the tools they need to manage orders effectively.
+   - Secure authentication and authorization.
+   - Real-time order tracking and management.
 
 ## Installation
 
@@ -86,33 +97,35 @@ This separation ensures that both users and administrators have access to the to
    git clone https://github.com/your-username/advanced-order-system.git
    cd advanced-order-system
    ```
-2. **Install Dependencies:**\
+
+2. **Install Dependencies:**
    Ensure you have Node.js and npm installed. Then run:
    ```bash
    npm install
    ```
-3. **Run the Application:**
-   ```bash
-   npm start
-   ```
-4. **Access the Application:**\
-   Open your browser and navigate to `http://localhost:3000`.
 
-*Note: Further instructions for environment configuration may be added as the project evolves.*
+3. **Start the Development Server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the Application:**
+   Open your browser and navigate to `http://localhost:5000`.
 
 ## Usage
 
 - **For Users:**
-
   - Sign up or log in to your account.
   - Use the order form to place a new order, customize your product, and upload any required files.
   - Confirm your order details and track progress through your account.
+  - Receive email notifications for order status updates.
 
 - **For Administrators:**
-
   - Log in to the admin dashboard.
   - Monitor, manage, and update incoming orders.
+  - Use filters and search to find specific orders.
   - Generate reports to review overall sales and order performance.
+  - Manage customer information and order history.
 
 ## Project Timeline
 
