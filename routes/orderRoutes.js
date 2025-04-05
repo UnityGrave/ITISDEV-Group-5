@@ -33,11 +33,11 @@ router.post("/submit", upload.single("file_upload"), async (req, res) => {
             };
         }
 
-        // Get the latest order to generate the next order ID
-        const latestOrder = await Order.findOne().sort({ dateOrdered: -1 });
+        // Get the highest order ID
+        const highestOrder = await Order.findOne().sort({ orderId: -1 });
         let nextOrderId = "#001";
-        if (latestOrder && latestOrder.orderId) {
-            const lastNumber = parseInt(latestOrder.orderId.substring(1));
+        if (highestOrder && highestOrder.orderId) {
+            const lastNumber = parseInt(highestOrder.orderId.substring(1));
             nextOrderId = `#${String(lastNumber + 1).padStart(3, '0')}`;
         }
 
